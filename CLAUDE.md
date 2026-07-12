@@ -13,8 +13,14 @@ and fails the check on a material regression. Full concept: `README.md`.
 
 ## How to run
 
-Not established — no build/test/run command or language chosen yet. Add it here (and to
-`README.md`) with the first slice of real code, not before.
+Python ≥3.11, stdlib-only runtime (pytest for dev). Implemented 2026-07-12; the package
+is `llm-release-gate` (CLI: `python -m llm_release_gate`).
+
+- `make install` · `make test` · `make demo-green` (exit 0) · `make demo-red` (must exit 1)
+- `make ci` = what `.github/workflows/ci.yml` runs (plus an action.yml self-test lane).
+- Windows: run make targets under Git Bash, or use the underlying `python -m` commands.
+- `examples/assistant-cheap-regression` is deliberately red — never "fix" it.
+- Agent working agreements + invariants: `AGENTS.md`. Docs: `docs/`, growth: `NEXT.md`.
 
 ## Rules (T1 — keep it minimal)
 
