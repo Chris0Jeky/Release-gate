@@ -1,0 +1,20 @@
+# Harness — never commit local permission overrides (holds bypassPermissions)
+.claude/settings.local.json
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets — model API keys come from the environment, never the repo
+.env
+.env.*
+*.pem
+*credentials*
+
+# (Language-specific ignores — node_modules/, __pycache__/, target/, dist/ —
+#  are added with the first slice of real code, not before. Second-occurrence rule.)

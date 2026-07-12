@@ -1,0 +1,17 @@
+{
+  "tier": 1,
+  "name": "sandbox",
+  "authority": { "push": "free", "merge": "free" },
+  "flags": {
+    "sensitive_data": false,
+    "wave_mode": false,
+    "dormant_production": false,
+    "relaxed_work_loss_guards": false
+  },
+  "model_routing": { "harness_and_review": "top", "slices": "mid", "maintenance": "cheap" },
+  "budgets": { "standing_context_tokens": 1000, "session_baseline_tokens": null },
+  "human_todo": null,
+  "runtimes": ["claude"],
+  "last_reviewed": "2026-07-12",
+  "notes": "T1 sandbox, plain (no sensitive_data). New open-source project: a CLI + GitHub Action that blocks unsafe prompt/model/retrieval/tool/config changes by running baseline vs candidate configs over a golden/replay dataset and failing the PR check on a material quality/cost/latency regression. Single-runtime (Claude) per BLUEPRINT §7 default — no dual-runtime signal at bootstrap; add AGENTS.md + .codex/hooks.json (the EvidenceDeck pattern) if Codex is ever adopted. The deny floor is NOT vendored into this repo (no .claude/hooks/ copy) to avoid the global+repo double-spawn tracked as Taskdeck #1293. Claude gets the floor from the GLOBAL PreToolUse hook (~/.claude/hooks/dispatch.py v1.3.0, read via CLAUDE_PROJECT_DIR); absent tier.json it would fall to identical T1 defaults since this repo carries no overlay flags. Only the PRE deny event is wired at T1 — no ledger/session/stop machinery. bypassPermissions lives in gitignored .claude/settings.local.json (owner wants max trust by default); committed settings.json keeps acceptEdits + the floor deny list as the fresh-clone baseline. Model API keys come from the environment, never committed. human_todo=null: T1 has no human-action file. Bootstrapped 2026-07-12 per agent-harness/MIGRATION_PROMPT.md 'Any NEW repo' recipe."
+}
