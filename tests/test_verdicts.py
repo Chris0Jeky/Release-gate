@@ -157,3 +157,32 @@ def test_unknown_metric_is_config_error():
     t = thresholds(ThresholdRule("quality.typo_rate", {"max_drop_abs": 0.1}))
     with pytest.raises(GateConfigError, match="quality.typo_rate"):
         evaluate_thresholds(t, aggs(), aggs())
+
+
+def test_direction_mismatched_constraints_are_config_errors():
+    # a drop-guard on a lower-is-better metric can never fire -> must be rejected
+    t = thresholds(ThresholdRule("latency.p95_ms", {"max_drop_pct": 10}))
+    baseline = aggs(**{"latency.p95_ms": scalar_metric(500, "ms", LOWER)})
+    cand = aggs(**{"latency.p95_ms": scalar_metric(5000, "ms", LOWER)})
+    with pytest.raises(GateConfigError, match="max_increase"):
+        evaluate_thresholds(t, baseline, cand)
+    # and an increase-guard on a higher-is-better metric likewise
+    t = thresholds(ThresholdRule("quality.pass_rate", {"max_increase_abs": 0.1}))
+    baseline = aggs(**{"quality.pass_rate": rate_metric(8, 8, HIGHER)})
+    cand = aggs(**{"quality.pass_rate": rate_metric(1, 8, HIGHER)})
+    with pytest.raises(GateConfigError, match="max_drop"):
+        evaluate_thresholds(t, baseline, cand)
+
+
+def test_percentile_is_nearest_rank():
+    from llm_release_gate.metrics import percentile
+
+    values = [100.0, 200.0, 300.0, 400.0, 500.0]
+    assert percentile(values, 50) == 300.0   # ceil(2.5) = 3rd, the true median
+    assert percentile(values, 95) == 500.0   # ceil(4.75) = 5th
+    assert percentile(values, 100) == 500.0
+    assert percentile([42.0], 50) == 42.0    # n=1: the only sample
+    thirteen = [float(i) for i in range(1, 14)]
+    assert percentile(thirteen, 95) == 13.0  # ceil(12.35) = 13th, keeps the worst
+    with pytest.raises(ValueError):
+        percentile([], 50)

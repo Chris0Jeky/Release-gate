@@ -25,6 +25,7 @@ Honesty rules encoded here:
 
 from __future__ import annotations
 
+import math
 from typing import Optional
 
 HIGHER = "higher_better"
@@ -89,8 +90,10 @@ def unavailable_metric(unit: str, direction: str, note: str) -> dict:
 
 
 def percentile(sorted_values: list[float], pct: float) -> float:
-    """Nearest-rank percentile over an already-sorted, non-empty list."""
+    """Nearest-rank percentile (rank = ceil(p/100 * n)) over an already-sorted,
+    non-empty list. ceil, not round(): rounding down would systematically
+    understate lower-is-better latency percentiles and mask regressions."""
     if not sorted_values:
         raise ValueError("percentile of empty list")
-    k = max(1, round(pct / 100.0 * len(sorted_values)))
+    k = max(1, math.ceil(pct / 100.0 * len(sorted_values)))
     return sorted_values[min(k, len(sorted_values)) - 1]

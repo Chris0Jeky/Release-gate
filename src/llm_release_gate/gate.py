@@ -30,6 +30,8 @@ from .runner import RunResult
 EPS = 1e-9
 
 _NEEDS_BASELINE = {"max_drop_abs", "max_drop_pct", "max_increase_abs", "max_increase_pct"}
+_DROP_CONSTRAINTS = {"max_drop_abs", "max_drop_pct"}
+_INCREASE_CONSTRAINTS = {"max_increase_abs", "max_increase_pct"}
 
 _VERDICT_RANK = {"pass": 0, "skipped": 0, "warn": 1, "fail": 2}
 
@@ -162,10 +164,31 @@ def evaluate_thresholds(
                 f"thresholds reference metric '{rule.metric}' which no configured scorer "
                 f"or system metric produces; available: {sorted(known)}"
             )
+        _reject_direction_mismatch(rule, candidate_aggs[rule.metric])
         verdicts.append(
             _evaluate_rule(rule, baseline_aggs[rule.metric], candidate_aggs[rule.metric], implicit)
         )
     return verdicts
+
+
+def _reject_direction_mismatch(rule: ThresholdRule, metric: dict) -> None:
+    """A drop-guard on a lower-is-better metric (or an increase-guard on a
+    higher-is-better one) can never fire on a real regression — it would be a
+    gate that silently passes everything. Fail loudly at config time instead."""
+    direction = metric.get("direction")
+    for name in rule.constraints:
+        if name in _DROP_CONSTRAINTS and direction == "lower_better":
+            raise GateConfigError(
+                f"rule on '{rule.metric}': {name} guards higher-is-better metrics, but "
+                f"this metric is lower-is-better (a drop is an improvement) — "
+                f"use max_increase_abs/max_increase_pct instead"
+            )
+        if name in _INCREASE_CONSTRAINTS and direction == "higher_better":
+            raise GateConfigError(
+                f"rule on '{rule.metric}': {name} guards lower-is-better metrics, but "
+                f"this metric is higher-is-better (an increase is an improvement) — "
+                f"use max_drop_abs/max_drop_pct instead"
+            )
 
 
 def _delta(baseline_m: dict, candidate_m: dict) -> dict | None:
