@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: make install PY=python
+      - name: Tests + green/red demos
+        run: make ci PY=python
+      - name: Upload demo reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-reports-${{ matrix.python-version }}
+          path: out/
+
+  action-self-test:
+    # Exercises action.yml itself: the green example must pass the step,
+    # the red example must fail it (checked via continue-on-error + outcome).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gate a safe change (must pass)
+        id: green
+        uses: ./
+        with:
+          dataset: examples/rag-support-bot/dataset.json
+          baseline: examples/rag-support-bot/baseline.json
+          candidate: examples/rag-support-bot/candidate.json
+          scorers: examples/rag-support-bot/scorers.json
+          thresholds: examples/rag-support-bot/thresholds.json
+          pricing: examples/pricing.json
+          out: out/action-green
+          comment: "false"
+
+      - name: Gate the deliberate regression (must fail)
+        id: red
+        continue-on-error: true
+        uses: ./
+        with:
+          dataset: examples/assistant-cheap-regression/dataset.json
+          baseline: examples/assistant-cheap-regression/baseline.json
+          candidate: examples/assistant-cheap-regression/candidate.json
+          scorers: examples/assistant-cheap-regression/scorers.json
+          thresholds: examples/assistant-cheap-regression/thresholds.json
+          pricing: examples/pricing.json
+          out: out/action-red
+          comment: "false"
+
+      - name: Assert outcomes
+        run: |
+          test "${{ steps.green.outputs.verdict }}" = "pass"
+          test "${{ steps.red.outcome }}" = "failure"
+          test "${{ steps.red.outputs.verdict }}" = "fail"
+          echo "action self-test OK: green passed, red was blocked"
