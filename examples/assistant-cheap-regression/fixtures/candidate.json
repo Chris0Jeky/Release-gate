@@ -1,0 +1,68 @@
+{
+  "_comment": "THE DELIBERATE REGRESSION. demo-mini-1 cuts cost ~96% and is faster — but gets 3 of 8 answers wrong, fabricates policy on both questions it should abstain on (citing nonexistent sources hr-99 / hr-12), and drops the citation on p6. The gate must FAIL this candidate (exit 1).",
+  "version": "1",
+  "responses": {
+    "demo-mini-1": {
+      "p1": {
+        "text": "Full-time employees get 25 days of annual leave per year plus public holidays. [doc:hr-1]",
+        "prompt_tokens": 431,
+        "completion_tokens": 58,
+        "latency_ms": 820.0
+      },
+      "p2": {
+        "text": "Employees may work remotely up to 2 days each week. [doc:hr-2]",
+        "prompt_tokens": 424,
+        "completion_tokens": 46,
+        "latency_ms": 760.0
+      },
+      "p3": {
+        "text": "Submit your expense report through FinancePortal within 30 days of purchase and attach receipts. [doc:hr-3]",
+        "prompt_tokens": 428,
+        "completion_tokens": 55,
+        "latency_ms": 800.0
+      },
+      "p4": {
+        "text": "The company offers 12 weeks of paid parental leave for primary caregivers. [doc:hr-4]",
+        "prompt_tokens": 419,
+        "completion_tokens": 49,
+        "latency_ms": 745.0
+      },
+      "p5": {
+        "text": "Performance reviews are held twice a year, in March and September. [doc:hr-5]",
+        "prompt_tokens": 415,
+        "completion_tokens": 45,
+        "latency_ms": 730.0
+      },
+      "p6": {
+        "text": "Let your manager know as soon as possible on the first day you are unwell.",
+        "prompt_tokens": 422,
+        "completion_tokens": 41,
+        "latency_ms": 705.0
+      },
+      "p7": {
+        "text": "Yes, pension contributions are matched up to 6% of base salary. [doc:hr-7]",
+        "prompt_tokens": 412,
+        "completion_tokens": 44,
+        "latency_ms": 715.0
+      },
+      "p8": {
+        "text": "Core hours are 10:00 to 15:00 local time. [doc:hr-8]",
+        "prompt_tokens": 417,
+        "completion_tokens": 40,
+        "latency_ms": 690.0
+      },
+      "p9": {
+        "text": "Employees become eligible for a four-week paid sabbatical after five years of continuous service. [doc:hr-99]",
+        "prompt_tokens": 426,
+        "completion_tokens": 52,
+        "latency_ms": 875.0
+      },
+      "p10": {
+        "text": "Yes, home office chairs up to $300 can be expensed through FinancePortal. [doc:hr-12]",
+        "prompt_tokens": 430,
+        "completion_tokens": 50,
+        "latency_ms": 940.0
+      }
+    }
+  }
+}

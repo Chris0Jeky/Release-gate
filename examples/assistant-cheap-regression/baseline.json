@@ -1,0 +1,11 @@
+{
+  "name": "hr-assistant-v7 (live, demo-pro-1)",
+  "provider": "fake",
+  "model": "demo-pro-1",
+  "params": { "temperature": 0.0, "max_tokens": 400 },
+  "prompt": {
+    "system": "You are the Northwind staff assistant. Answer strictly from the provided policy sources, cite each claim with [doc:id], and say you don't know when the sources do not cover the question.",
+    "template": "Policy sources:\n$sources\n\nStaff question: $question"
+  },
+  "provider_options": { "fixtures": "fixtures/baseline.json" }
+}

@@ -1,0 +1,68 @@
+{
+  "_comment": "Live assistant on demo-pro-1: answers all 8 answerable questions correctly with valid citations, and correctly abstains on the 2 questions the sources do not cover.",
+  "version": "1",
+  "responses": {
+    "demo-pro-1": {
+      "p1": {
+        "text": "Full-time employees accrue 25 days of annual leave per calendar year, plus public holidays; up to 5 unused days carry over. [doc:hr-1]",
+        "prompt_tokens": 431,
+        "completion_tokens": 92,
+        "latency_ms": 1240.0
+      },
+      "p2": {
+        "text": "You may work remotely up to 3 days per week with manager approval; fully remote arrangements additionally require HR sign-off. [doc:hr-2]",
+        "prompt_tokens": 424,
+        "completion_tokens": 88,
+        "latency_ms": 1195.0
+      },
+      "p3": {
+        "text": "Submit expense reports through FinancePortal within 30 days of purchase, with receipts attached; approval goes to your cost-center owner. [doc:hr-3]",
+        "prompt_tokens": 428,
+        "completion_tokens": 90,
+        "latency_ms": 1230.0
+      },
+      "p4": {
+        "text": "Primary caregivers receive 16 weeks fully paid parental leave, secondary caregivers 4 weeks, available from the first day of employment. [doc:hr-4]",
+        "prompt_tokens": 419,
+        "completion_tokens": 87,
+        "latency_ms": 1180.0
+      },
+      "p5": {
+        "text": "Performance reviews run twice a year, in March and September; self-assessments open two weeks before each cycle. [doc:hr-5]",
+        "prompt_tokens": 415,
+        "completion_tokens": 84,
+        "latency_ms": 1150.0
+      },
+      "p6": {
+        "text": "Notify your manager before 10:00 on the first day of absence; a doctor's note is required from the fourth consecutive day. [doc:hr-6]",
+        "prompt_tokens": 422,
+        "completion_tokens": 89,
+        "latency_ms": 1215.0
+      },
+      "p7": {
+        "text": "Yes — the company matches pension contributions up to 6% of base salary, vested immediately. [doc:hr-7]",
+        "prompt_tokens": 412,
+        "completion_tokens": 78,
+        "latency_ms": 1120.0
+      },
+      "p8": {
+        "text": "Core working hours are 10:00 to 15:00 local time; outside those hours you schedule flexibly with your team. [doc:hr-8]",
+        "prompt_tokens": 417,
+        "completion_tokens": 83,
+        "latency_ms": 1160.0
+      },
+      "p9": {
+        "text": "The provided policy sources do not cover sabbatical leave, so I don't know. Please contact HR directly for an authoritative answer.",
+        "prompt_tokens": 426,
+        "completion_tokens": 74,
+        "latency_ms": 1105.0
+      },
+      "p10": {
+        "text": "The expense source describes the submission procedure but not which items are expensable, so I don't know whether a home office chair qualifies. Please check with your cost-center owner.",
+        "prompt_tokens": 430,
+        "completion_tokens": 81,
+        "latency_ms": 1345.0
+      }
+    }
+  }
+}

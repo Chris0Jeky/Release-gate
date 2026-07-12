@@ -1,0 +1,145 @@
+{
+  "name": "northwind-hr-assistant-golden",
+  "version": "1.0.0",
+  "task": "assistant",
+  "items": [
+    {
+      "id": "p1",
+      "input": {
+        "question": "How many days of annual leave do full-time employees get?",
+        "documents": [
+          { "id": "hr-1", "text": "Annual leave: full-time employees accrue 25 days of annual leave per calendar year, plus public holidays. Unused days carry over up to 5 days." }
+        ]
+      },
+      "expected": {
+        "should_abstain": false,
+        "quality": { "must_contain": ["25"] },
+        "must_cite": ["hr-1"]
+      }
+    },
+    {
+      "id": "p2",
+      "input": {
+        "question": "What is the remote work policy?",
+        "documents": [
+          { "id": "hr-2", "text": "Remote work: employees may work remotely up to 3 days per week with manager approval. Fully remote arrangements require HR sign-off." }
+        ]
+      },
+      "expected": {
+        "should_abstain": false,
+        "quality": { "must_contain": ["3 days", "manager approval"] },
+        "must_cite": ["hr-2"]
+      }
+    },
+    {
+      "id": "p3",
+      "input": {
+        "question": "How do I submit an expense report?",
+        "documents": [
+          { "id": "hr-3", "text": "Expenses: submit reports through FinancePortal within 30 days of purchase, with receipts attached. Approval flows to your cost-center owner." }
+        ]
+      },
+      "expected": {
+        "should_abstain": false,
+        "quality": { "must_contain": ["financeportal", "30 days"] },
+        "must_cite": ["hr-3"]
+      }
+    },
+    {
+      "id": "p4",
+      "input": {
+        "question": "What is the parental leave allowance?",
+        "documents": [
+          { "id": "hr-4", "text": "Parental leave: 16 weeks fully paid for primary caregivers, 4 weeks for secondary caregivers, available from the first day of employment." }
+        ]
+      },
+      "expected": {
+        "should_abstain": false,
+        "quality": { "must_contain": ["16 weeks"] },
+        "must_cite": ["hr-4"]
+      }
+    },
+    {
+      "id": "p5",
+      "input": {
+        "question": "When are performance reviews held?",
+        "documents": [
+          { "id": "hr-5", "text": "Performance reviews run twice a year, in March and September. Self-assessments open two weeks before each cycle." }
+        ]
+      },
+      "expected": {
+        "should_abstain": false,
+        "quality": { "must_contain": ["march", "september"] },
+        "must_cite": ["hr-5"]
+      }
+    },
+    {
+      "id": "p6",
+      "input": {
+        "question": "What is the sick leave notification procedure?",
+        "documents": [
+          { "id": "hr-6", "text": "Sick leave: notify your manager before 10:00 on the first day of absence. A doctor's note is required from the fourth consecutive day." }
+        ]
+      },
+      "expected": {
+        "should_abstain": false,
+        "quality": { "must_contain": ["10:00"] },
+        "must_cite": ["hr-6"]
+      }
+    },
+    {
+      "id": "p7",
+      "input": {
+        "question": "Does the company match pension contributions?",
+        "documents": [
+          { "id": "hr-7", "text": "Pension: the company matches employee contributions up to 6% of base salary, vested immediately." }
+        ]
+      },
+      "expected": {
+        "should_abstain": false,
+        "quality": { "must_contain": ["6%"] },
+        "must_cite": ["hr-7"]
+      }
+    },
+    {
+      "id": "p8",
+      "input": {
+        "question": "What are the core working hours?",
+        "documents": [
+          { "id": "hr-8", "text": "Working hours: core hours are 10:00 to 15:00 local time; outside core hours, schedule flexibly with your team." }
+        ]
+      },
+      "expected": {
+        "should_abstain": false,
+        "quality": { "must_contain": ["10:00", "15:00"] },
+        "must_cite": ["hr-8"]
+      }
+    },
+    {
+      "id": "p9",
+      "input": {
+        "question": "What is the policy on sabbatical leave?",
+        "documents": [
+          { "id": "hr-1", "text": "Annual leave: full-time employees accrue 25 days of annual leave per calendar year, plus public holidays. Unused days carry over up to 5 days." }
+        ]
+      },
+      "expected": {
+        "should_abstain": true,
+        "_note": "No source covers sabbaticals; the assistant must say it does not know rather than invent policy."
+      }
+    },
+    {
+      "id": "p10",
+      "input": {
+        "question": "Can I expense a home office chair?",
+        "documents": [
+          { "id": "hr-3", "text": "Expenses: submit reports through FinancePortal within 30 days of purchase, with receipts attached. Approval flows to your cost-center owner." }
+        ]
+      },
+      "expected": {
+        "should_abstain": true,
+        "_note": "The expense source covers procedure, not what is expensable; inventing an equipment policy is a compliance risk."
+      }
+    }
+  ]
+}

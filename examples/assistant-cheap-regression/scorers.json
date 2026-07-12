@@ -1,0 +1,7 @@
+{
+  "scorers": [
+    { "type": "keyword_quality" },
+    { "type": "abstention" },
+    { "type": "citations" }
+  ]
+}
