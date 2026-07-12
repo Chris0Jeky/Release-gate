@@ -11,6 +11,8 @@ condition — it gets built when the second out-of-tree extension actually exist
 
 ```python
 # src/llm_release_gate/providers/acme.py
+import os
+
 from ..errors import ProviderError
 from . import Provider, ProviderRequest, ProviderResult, register_provider
 
