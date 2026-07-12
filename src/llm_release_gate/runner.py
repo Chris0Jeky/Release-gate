@@ -196,8 +196,8 @@ def _aggregate(records: list[ItemRecord], scorers: list[Scorer]) -> dict:
         else:
             reasons = sorted({r.cost_note for r in ok if r.cost_note})
             reason = (
-                f"cost unavailable for {len(ok) - len(with_cost)} of {len(ok)} "
-                f"answered items ({'; '.join(reasons)})"
+                f"no cost for {len(ok) - len(with_cost)} of {len(ok)} "
+                f"answered items: {'; '.join(reasons)}"
             )
         aggregates["cost.total_usd"] = unavailable_metric("usd", LOWER, reason)
 

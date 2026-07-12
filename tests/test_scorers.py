@@ -1,0 +1,174 @@
+"""Scorer + adapter behavior at the item level."""
+
+import pytest
+
+from llm_release_gate.adapters import build_adapter
+from llm_release_gate.adapters.extraction import ExtractionAdapter
+from llm_release_gate.errors import GateConfigError
+from llm_release_gate.loading import DatasetItem
+from llm_release_gate.scorers.abstention import AbstentionScorer
+from llm_release_gate.scorers.citations import CitationScorer
+from llm_release_gate.scorers.quality import FieldMatchScorer, KeywordQualityScorer
+from llm_release_gate.scorers.schema import JsonSchemaScorer, validate_against_schema
+
+
+def grounded_item(**expected) -> DatasetItem:
+    return DatasetItem(
+        id="i1",
+        input={"question": "q", "documents": [{"id": "d1", "text": "t"}, {"id": "d2", "text": "u"}]},
+        expected=expected,
+    )
+
+
+def parse_rag(text: str, item: DatasetItem):
+    return build_adapter("rag").parse(text, item)
+
+
+# ------------------------------------------------------------- adapters
+
+def test_grounded_adapter_extracts_citations_and_abstention():
+    item = grounded_item()
+    out = parse_rag("Answer per [doc:d1] and [doc:d2].", item)
+    assert out.citations == ["d1", "d2"] and out.abstained is False
+    out = parse_rag("I don't know based on these sources.", item)
+    assert out.abstained is True
+    out = parse_rag("There is not enough information to answer.", item)
+    assert out.abstained is True
+
+
+def test_extraction_adapter_strips_fences_and_reports_parse_errors():
+    adapter = ExtractionAdapter()
+    item = DatasetItem(id="x", input={"text": "t"}, expected={})
+    assert adapter.parse('{"a": 1}', item).json_obj == {"a": 1}
+    assert adapter.parse('```json\n{"a": 1}\n```', item).json_obj == {"a": 1}
+    bad = adapter.parse("sorry, here is the data: a=1", item)
+    assert bad.json_obj is None and "not valid JSON" in bad.parse_error
+
+
+# ------------------------------------------------------------- keyword quality
+
+def test_keyword_quality_pass_fail_and_applicability():
+    scorer = KeywordQualityScorer({})
+    item = grounded_item(quality={"must_contain": ["Blue"], "must_not_contain": ["maybe"]})
+    ok = scorer.score_item(item, parse_rag("The sky is blue. [doc:d1]", item))
+    assert ok["quality.pass_rate"]["passed"] is True
+    missing = scorer.score_item(item, parse_rag("The sky is red.", item))
+    assert missing["quality.pass_rate"]["passed"] is False
+    assert "missing expected terms" in missing["quality.pass_rate"]["detail"]
+    forbidden = scorer.score_item(item, parse_rag("Maybe blue.", item))
+    assert forbidden["quality.pass_rate"]["passed"] is False
+    # should-abstain items are the abstention scorer's job
+    abstain_item = grounded_item(should_abstain=True, quality={"must_contain": ["x"]})
+    assert scorer.score_item(abstain_item, parse_rag("whatever", abstain_item))[
+        "quality.pass_rate"]["applicable"] is False
+
+
+def test_field_match_exact_and_mismatch():
+    scorer = FieldMatchScorer({})
+    adapter = ExtractionAdapter()
+    item = DatasetItem(id="x", input={"text": "t"},
+                       expected={"fields": {"vendor": "Acme", "total": 310}})
+    good = scorer.score_item(item, adapter.parse('{"vendor": "Acme", "total": 310.0}', item))
+    assert good["quality.pass_rate"]["passed"] is True  # 310.0 == 310
+    bad = scorer.score_item(item, adapter.parse('{"vendor": "ACME Inc", "total": 310}', item))
+    assert bad["quality.pass_rate"]["passed"] is False
+    assert "vendor" in bad["quality.pass_rate"]["detail"]
+    unparsed = scorer.score_item(item, adapter.parse("no json here", item))
+    assert unparsed["quality.pass_rate"]["passed"] is False
+
+
+# ------------------------------------------------------------- abstention
+
+def test_abstention_four_quadrants():
+    scorer = AbstentionScorer({})
+    should = grounded_item(should_abstain=True)
+    should_not = grounded_item(should_abstain=False)
+    abstained = parse_rag("I don't know.", should)
+    answered = parse_rag("It is 42. [doc:d1]", should)
+
+    r = scorer.score_item(should, abstained)
+    assert r["abstention.false_answer_rate"]["passed"] is True
+    r = scorer.score_item(should, answered)
+    assert r["abstention.false_answer_rate"]["passed"] is False
+    r = scorer.score_item(should_not, answered)
+    assert r["abstention.over_abstention_rate"]["passed"] is True
+    r = scorer.score_item(should_not, abstained)
+    assert r["abstention.over_abstention_rate"]["passed"] is False
+    # no expectation -> neither metric applies
+    neither = grounded_item()
+    r = scorer.score_item(neither, answered)
+    assert r["abstention.false_answer_rate"]["applicable"] is False
+    assert r["abstention.over_abstention_rate"]["applicable"] is False
+
+
+# ------------------------------------------------------------- citations
+
+def test_citation_validity_cases():
+    scorer = CitationScorer({})
+    item = grounded_item(should_abstain=False, must_cite=["d1"])
+    ok = scorer.score_item(item, parse_rag("Fact. [doc:d1]", item))
+    assert ok["citations.valid_rate"]["passed"] is True
+    none = scorer.score_item(item, parse_rag("Fact with no marker.", item))
+    assert none["citations.valid_rate"]["passed"] is False
+    assert "no citations" in none["citations.valid_rate"]["detail"]
+    ghost = scorer.score_item(item, parse_rag("Fact. [doc:d9]", item))
+    assert "nonexistent" in ghost["citations.valid_rate"]["detail"]
+    missed = scorer.score_item(item, parse_rag("Fact. [doc:d2]", item))
+    assert "required sources not cited" in missed["citations.valid_rate"]["detail"]
+
+
+def test_citation_scorer_skips_abstentions_but_checks_fabricated_answers():
+    scorer = CitationScorer({})
+    abstain_item = grounded_item(should_abstain=True)
+    abstained = parse_rag("I don't know.", abstain_item)
+    assert scorer.score_item(abstain_item, abstained)["citations.valid_rate"]["applicable"] is False
+    fabricated = parse_rag("Policy says 4 weeks. [doc:hr-99]", abstain_item)
+    r = scorer.score_item(abstain_item, fabricated)
+    assert r["citations.valid_rate"]["applicable"] is True
+    assert r["citations.valid_rate"]["passed"] is False
+
+
+# ------------------------------------------------------------- json schema
+
+SCHEMA = {
+    "type": "object",
+    "required": ["vendor", "total"],
+    "properties": {
+        "vendor": {"type": "string"},
+        "total": {"type": "number"},
+        "currency": {"type": "string", "enum": ["USD", "EUR"]},
+        "lines": {"type": "array", "items": {"type": "object", "required": ["sku"]}},
+    },
+    "additionalProperties": False,
+}
+
+
+@pytest.mark.parametrize("value,fragment", [
+    ({"total": 1}, "missing required property 'vendor'"),
+    ({"vendor": "A", "total": "1"}, "expected number, got str"),
+    ({"vendor": "A", "total": 1, "currency": "GBP"}, "not in enum"),
+    ({"vendor": "A", "total": 1, "lines": [{}]}, "missing required property 'sku'"),
+    ({"vendor": "A", "total": 1, "extra": 1}, "unexpected properties"),
+    ({"vendor": "A", "total": True}, "expected number, got boolean"),
+])
+def test_schema_violations(value, fragment):
+    errors = validate_against_schema(value, SCHEMA)
+    assert any(fragment in e for e in errors), errors
+
+
+def test_schema_valid_object_passes():
+    value = {"vendor": "A", "total": 9.5, "currency": "EUR", "lines": [{"sku": "s"}]}
+    assert validate_against_schema(value, SCHEMA) == []
+
+
+def test_json_schema_scorer_requires_schema_option():
+    with pytest.raises(GateConfigError, match="options.schema"):
+        JsonSchemaScorer({})
+
+
+def test_json_schema_scorer_counts_parse_failures_as_invalid():
+    scorer = JsonSchemaScorer({"schema": {"type": "object"}})
+    adapter = ExtractionAdapter()
+    item = DatasetItem(id="x", input={"text": "t"}, expected={})
+    r = scorer.score_item(item, adapter.parse("not json", item))
+    assert r["schema.valid_rate"]["passed"] is False
