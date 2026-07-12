@@ -16,5 +16,14 @@ Thumbs.db
 *.pem
 *credentials*
 
-# (Language-specific ignores — node_modules/, __pycache__/, target/, dist/ —
-#  are added with the first slice of real code, not before. Second-occurrence rule.)
+# Python (language chosen with the first real slice: stdlib-only runtime, pytest for dev)
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.venv/
+
+# Gate output artifacts (reports/manifests are build products, not source)
+out/
