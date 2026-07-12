@@ -76,30 +76,45 @@ runs:
 
     # Run the gate but defer the exit code so the PR comment is posted for
     # failing candidates too — a silent red X without the report defeats the point.
+    # Inputs are passed via env (never interpolated into the script text): a
+    # ${{ }} expansion inside `run` would execute attacker-controlled input.
     - name: Run gate
       id: gate
       shell: bash
+      env:
+        IN_DATASET: ${{ inputs.dataset }}
+        IN_BASELINE: ${{ inputs.baseline }}
+        IN_CANDIDATE: ${{ inputs.candidate }}
+        IN_SCORERS: ${{ inputs.scorers }}
+        IN_THRESHOLDS: ${{ inputs.thresholds }}
+        IN_PRICING: ${{ inputs.pricing }}
+        IN_OUT: ${{ inputs.out }}
       run: |
         set +e
         args=(
-          --dataset   "${{ inputs.dataset }}"
-          --baseline  "${{ inputs.baseline }}"
-          --candidate "${{ inputs.candidate }}"
-          --scorers   "${{ inputs.scorers }}"
-          --thresholds "${{ inputs.thresholds }}"
-          --out       "${{ inputs.out }}"
+          --dataset    "$IN_DATASET"
+          --baseline   "$IN_BASELINE"
+          --candidate  "$IN_CANDIDATE"
+          --scorers    "$IN_SCORERS"
+          --thresholds "$IN_THRESHOLDS"
+          --out        "$IN_OUT"
         )
-        if [ -n "${{ inputs.pricing }}" ]; then
-          args+=(--pricing "${{ inputs.pricing }}")
+        if [ -n "$IN_PRICING" ]; then
+          args+=(--pricing "$IN_PRICING")
         fi
         python -m llm_release_gate gate "${args[@]}"
         code=$?
         echo "cli-exit=$code" >> "$GITHUB_OUTPUT"
         exit 0
 
+    # Finds this action's own previous comment via a marker (never touches other
+    # bots' comments) and updates it, else creates one. Comment delivery failure
+    # (e.g. missing `pull-requests: write`) is a warning, not a failed check —
+    # the verdict must come from the gate, and the enforce step must still run.
     - name: Comment on pull request
       if: >-
-        inputs.comment == 'true' && github.event_name == 'pull_request' &&
+        inputs.comment == 'true' &&
+        (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') &&
         steps.gate.outputs.report-md != ''
       shell: bash
       env:
@@ -108,10 +123,21 @@ runs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
         REPO: ${{ github.repository }}
       run: |
-        # Update the previous gate comment when possible; fall back to a new one.
-        gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file "$REPORT_MD" \
-          --edit-last --create-if-none \
-          || gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file "$REPORT_MD"
+        set +e
+        marker="<!-- llm-release-gate-report -->"
+        body_file="$(mktemp)"
+        printf '%s\n\n' "$marker" | cat - "$REPORT_MD" > "$body_file"
+        comment_id=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+          --jq "[.[] | select(.body | startswith(\"$marker\"))][0].id" 2>/dev/null)
+        if [ -n "$comment_id" ] && [ "$comment_id" != "null" ]; then
+          gh api -X PATCH "repos/$REPO/issues/comments/$comment_id" -F body=@"$body_file" >/dev/null
+        else
+          gh api -X POST "repos/$REPO/issues/$PR_NUMBER/comments" -F body=@"$body_file" >/dev/null
+        fi
+        if [ $? -ne 0 ]; then
+          echo "::warning::llm-release-gate could not post the PR comment (does the workflow grant 'pull-requests: write'?). The verdict is unaffected; see the job summary."
+        fi
+        exit 0
 
     - name: Enforce gate verdict
       shell: bash

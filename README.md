@@ -22,7 +22,7 @@ production.
 
 ```bash
 make install     # pip install -e ".[dev]"
-make test        # 66 tests, < 1 s
+make test        # 75 tests, < 1 s
 make demo-green  # two safe changes -> gate PASS (exit 0)
 make demo-red    # a deliberate regression -> gate FAIL (exit 1)
 ```
@@ -100,15 +100,21 @@ alone), each at level `fail` or `warn`. See `examples/*/thresholds.json`.
 ## GitHub Action
 
 ```yaml
-- uses: your-org/llm-release-gate@v0   # or a local checkout: uses: ./
-  with:
-    dataset: eval/dataset.json
-    baseline: eval/baseline.json
-    candidate: eval/candidate.json
-    scorers: eval/scorers.json
-    thresholds: eval/thresholds.json
-    pricing: eval/pricing.json         # optional
-    comment: "true"                    # posts/updates the PR comment
+permissions:
+  contents: read
+  pull-requests: write   # needed for the PR comment; without it the comment
+                         # becomes a warning and the verdict still stands
+steps:
+  - uses: actions/checkout@v4
+  - uses: your-org/llm-release-gate@v0   # or a local checkout: uses: ./
+    with:
+      dataset: eval/dataset.json
+      baseline: eval/baseline.json
+      candidate: eval/candidate.json
+      scorers: eval/scorers.json
+      thresholds: eval/thresholds.json
+      pricing: eval/pricing.json         # optional
+      comment: "true"                    # posts/updates the PR comment
 ```
 
 The Action installs the CLI, runs the gate, writes the job summary, posts the Markdown
