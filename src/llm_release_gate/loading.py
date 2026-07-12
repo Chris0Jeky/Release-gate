@@ -115,6 +115,12 @@ def load_run_config(path: str, role: str) -> RunConfig:
     prompt = data.get("prompt", {})
     if not isinstance(prompt, dict):
         raise GateConfigError(f"{role} config {path}: 'prompt' must be an object")
+    template = prompt.get("template")
+    if not template or not isinstance(template, str):
+        raise GateConfigError(
+            f"{role} config {path}: prompt.template is required (a $field template; "
+            f"see the task adapter for available fields)"
+        )
     return RunConfig(
         name=str(name), provider=str(provider), model=str(model),
         params=data.get("params", {}) or {},

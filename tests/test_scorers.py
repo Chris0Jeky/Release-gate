@@ -117,6 +117,23 @@ def test_citation_validity_cases():
     assert "required sources not cited" in missed["citations.valid_rate"]["detail"]
 
 
+def test_hedged_fabrication_is_an_answer_not_an_abstention():
+    # "I don't know ... but here's a cited claim" must count as answering:
+    # false_answer_rate records the violation and the citation gets validated.
+    item = grounded_item(should_abstain=True)
+    out = parse_rag(
+        "I don't know the exact clause, but the notice period is 4 weeks [doc:hr-99].", item
+    )
+    assert out.abstained is False
+    r = AbstentionScorer({}).score_item(item, out)
+    assert r["abstention.false_answer_rate"]["passed"] is False
+    c = CitationScorer({}).score_item(item, out)
+    assert c["citations.valid_rate"]["applicable"] is True
+    assert c["citations.valid_rate"]["passed"] is False
+    # a hedge with no citation still reads as an abstention (documented limit)
+    assert parse_rag("I don't know.", item).abstained is True
+
+
 def test_citation_scorer_skips_abstentions_but_checks_fabricated_answers():
     scorer = CitationScorer({})
     abstain_item = grounded_item(should_abstain=True)
@@ -164,6 +181,34 @@ def test_schema_valid_object_passes():
 def test_json_schema_scorer_requires_schema_option():
     with pytest.raises(GateConfigError, match="options.schema"):
         JsonSchemaScorer({})
+
+
+def test_unenforceable_schemas_are_rejected_at_construction():
+    # unsupported keyword: silently ignoring "minimum" would inflate valid_rate
+    with pytest.raises(GateConfigError, match="minimum"):
+        JsonSchemaScorer({"schema": {"type": "object", "properties": {
+            "total": {"type": "number", "minimum": 0}}}})
+    # union types crash the old validator mid-run; now a clean config error
+    with pytest.raises(GateConfigError, match="union"):
+        JsonSchemaScorer({"schema": {"type": "object", "properties": {
+            "vendor": {"type": ["string", "null"]}}}})
+    # schema-valued additionalProperties is not enforceable either
+    with pytest.raises(GateConfigError, match="additionalProperties"):
+        JsonSchemaScorer({"schema": {"type": "object",
+                                     "additionalProperties": {"type": "string"}}})
+
+
+def test_json_semantics_bool_is_not_int():
+    # enum: JSON true must not satisfy an integer enum
+    errors = validate_against_schema({"priority": True},
+                                     {"properties": {"priority": {"enum": [0, 1, 2]}}})
+    assert any("not in enum" in e for e in errors)
+    # field_match: true is not an exact match for 1 (and 310.0 == 310 still holds)
+    scorer = FieldMatchScorer({})
+    adapter = ExtractionAdapter()
+    item = DatasetItem(id="x", input={"text": "t"}, expected={"fields": {"quantity": 1}})
+    r = scorer.score_item(item, adapter.parse('{"quantity": true}', item))
+    assert r["quality.pass_rate"]["passed"] is False
 
 
 def test_json_schema_scorer_counts_parse_failures_as_invalid():

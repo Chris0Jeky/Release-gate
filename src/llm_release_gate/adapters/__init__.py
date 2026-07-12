@@ -44,8 +44,16 @@ class TaskAdapter(ABC):
 
     def build_request(self, item: DatasetItem, config: RunConfig) -> ProviderRequest:
         fields = self.prompt_fields(item)
-        template = config.prompt.get("template", "$input")
-        prompt = Template(template).safe_substitute(fields)
+        template = Template(config.prompt.get("template", ""))
+        # A typo'd placeholder would silently render literally and every request
+        # would carry a garbage prompt — misconfiguration must fail, not run.
+        unknown = set(template.get_identifiers()) - set(fields)
+        if unknown:
+            raise GateConfigError(
+                f"config '{config.name}': prompt template references unknown "
+                f"field(s) {sorted(unknown)}; task '{self.name}' provides {sorted(fields)}"
+            )
+        prompt = template.safe_substitute(fields)
         return ProviderRequest(
             model=config.model,
             system=config.prompt.get("system", ""),

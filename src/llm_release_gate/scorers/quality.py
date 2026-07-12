@@ -19,7 +19,7 @@ from __future__ import annotations
 from ..adapters import ParsedOutput
 from ..loading import DatasetItem
 from ..metrics import HIGHER
-from . import Scorer, item_result, register_scorer
+from . import Scorer, item_result, json_equal, register_scorer
 
 
 class KeywordQualityScorer(Scorer):
@@ -53,7 +53,7 @@ class KeywordQualityScorer(Scorer):
 
 class FieldMatchScorer(Scorer):
     name = "field_match"
-    version = "1"
+    version = "2"  # v2: JSON-strict equality (true != 1)
     metrics = {
         "quality.pass_rate": {"direction": HIGHER, "kind": "rate", "mode": "pass_rate"},
     }
@@ -72,7 +72,7 @@ class FieldMatchScorer(Scorer):
         mismatches = []
         for key, want in expected_fields.items():
             got = output.json_obj.get(key, "<missing>")
-            if got != want:
+            if not json_equal(got, want):
                 mismatches.append(f"{key}: expected {want!r}, got {got!r}")
         return {
             "quality.pass_rate": item_result(

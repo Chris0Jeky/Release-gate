@@ -34,6 +34,38 @@ from ..hashing import file_sha256
 from . import Provider, ProviderRequest, ProviderResult, register_provider
 
 
+def _validate_fixtures(responses: dict, path: str) -> None:
+    """Malformed fixtures must be a clean config error naming the entry — and
+    nonsense usage numbers (negative tokens) must never flow into cost totals
+    as if they were measured data."""
+    for model, items in responses.items():
+        if not isinstance(items, dict):
+            raise GateConfigError(
+                f"fake provider fixtures {path}: entry for model '{model}' must be an object"
+            )
+        for item_id, entry in items.items():
+            where = f"fixtures {path}, model '{model}', item '{item_id}'"
+            if not isinstance(entry, dict):
+                raise GateConfigError(f"fake provider {where}: entry must be an object")
+            for field in ("prompt_tokens", "completion_tokens"):
+                value = entry.get(field)
+                if value is not None and (
+                    not isinstance(value, int) or isinstance(value, bool) or value < 0
+                ):
+                    raise GateConfigError(
+                        f"fake provider {where}: {field} must be a non-negative integer "
+                        f"or omitted, got {value!r}"
+                    )
+            latency = entry.get("latency_ms")
+            if latency is not None and (
+                not isinstance(latency, (int, float)) or isinstance(latency, bool) or latency < 0
+            ):
+                raise GateConfigError(
+                    f"fake provider {where}: latency_ms must be a non-negative number "
+                    f"or omitted, got {latency!r}"
+                )
+
+
 class FakeProvider(Provider):
     name = "fake"
 
@@ -53,6 +85,7 @@ class FakeProvider(Provider):
             raise GateConfigError(f"fake provider fixtures not valid JSON: {path} ({exc})") from exc
         if not isinstance(data, dict) or not isinstance(data.get("responses"), dict):
             raise GateConfigError(f"fake provider fixtures {path}: expected {{'responses': {{...}}}}")
+        _validate_fixtures(data["responses"], path)
         self.fixtures_path = path
         self.fixtures_sha256 = file_sha256(path)
         self.responses: dict = data["responses"]

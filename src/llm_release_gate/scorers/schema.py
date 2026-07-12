@@ -6,8 +6,11 @@ Validates the parsed JSON against a schema given in scorer options:
 
 Implements a documented SUBSET of JSON Schema (kept dependency-free):
 type (object/array/string/number/integer/boolean/null), properties, required,
-items, enum, additionalProperties (boolean). Anything fancier belongs in a
-custom scorer — see docs/extending.md.
+items, enum, additionalProperties (boolean). The schema is validated against
+this subset at scorer construction: any keyword or construct the validator
+cannot enforce (minimum, pattern, oneOf, union types, ...) is a configuration
+error — silently ignoring it would report schema.valid_rate over checks that
+never ran. Anything fancier belongs in a custom scorer — see docs/extending.md.
 """
 
 from __future__ import annotations
@@ -16,7 +19,7 @@ from ..adapters import ParsedOutput
 from ..errors import GateConfigError
 from ..loading import DatasetItem
 from ..metrics import HIGHER
-from . import Scorer, item_result, register_scorer
+from . import Scorer, item_result, json_equal, register_scorer
 
 _TYPES = {
     "object": dict,
@@ -27,6 +30,48 @@ _TYPES = {
     "boolean": bool,
     "null": type(None),
 }
+
+_ALLOWED_KEYWORDS = {"type", "properties", "required", "items", "enum", "additionalProperties"}
+
+
+def validate_schema_definition(schema, path: str = "$") -> None:
+    """Reject any schema this validator cannot fully enforce. Fail-closed: an
+    unsupported keyword must be a config error, not a check that silently
+    passes everything."""
+    if not isinstance(schema, dict):
+        raise GateConfigError(f"json_schema scorer: schema at {path} must be an object")
+    unknown = set(schema) - _ALLOWED_KEYWORDS
+    if unknown:
+        raise GateConfigError(
+            f"json_schema scorer: unsupported keyword(s) {sorted(unknown)} at {path}; "
+            f"this validator enforces only {sorted(_ALLOWED_KEYWORDS)} — "
+            f"use a custom scorer for richer schemas (docs/extending.md)"
+        )
+    stype = schema.get("type")
+    if stype is not None and (not isinstance(stype, str) or stype not in _TYPES):
+        raise GateConfigError(
+            f"json_schema scorer: unsupported type {stype!r} at {path} "
+            f"(union types are not supported; allowed: {sorted(_TYPES)})"
+        )
+    if "required" in schema and (
+        not isinstance(schema["required"], list)
+        or not all(isinstance(k, str) for k in schema["required"])
+    ):
+        raise GateConfigError(f"json_schema scorer: 'required' at {path} must be a list of strings")
+    if "enum" in schema and not isinstance(schema["enum"], list):
+        raise GateConfigError(f"json_schema scorer: 'enum' at {path} must be a list")
+    if "additionalProperties" in schema and not isinstance(schema["additionalProperties"], bool):
+        raise GateConfigError(
+            f"json_schema scorer: 'additionalProperties' at {path} must be true or false "
+            f"(schema-valued additionalProperties is not supported)"
+        )
+    if "properties" in schema:
+        if not isinstance(schema["properties"], dict):
+            raise GateConfigError(f"json_schema scorer: 'properties' at {path} must be an object")
+        for key, sub in schema["properties"].items():
+            validate_schema_definition(sub, f"{path}.{key}")
+    if "items" in schema:
+        validate_schema_definition(schema["items"], f"{path}[]")
 
 
 def validate_against_schema(value, schema: dict, path: str = "$") -> list[str]:
@@ -44,7 +89,7 @@ def validate_against_schema(value, schema: dict, path: str = "$") -> list[str]:
         if not isinstance(value, expected):
             errors.append(f"{path}: expected {stype}, got {type(value).__name__}")
             return errors
-    if "enum" in schema and value not in schema["enum"]:
+    if "enum" in schema and not any(json_equal(value, e) for e in schema["enum"]):
         errors.append(f"{path}: value {value!r} not in enum {schema['enum']}")
     if isinstance(value, dict):
         for key in schema.get("required", []):
@@ -66,7 +111,7 @@ def validate_against_schema(value, schema: dict, path: str = "$") -> list[str]:
 
 class JsonSchemaScorer(Scorer):
     name = "json_schema"
-    version = "1"
+    version = "2"  # v2: schema rejected up front if not fully enforceable; JSON-strict enum
     metrics = {
         "schema.valid_rate": {"direction": HIGHER, "kind": "rate", "mode": "pass_rate"},
     }
@@ -76,6 +121,7 @@ class JsonSchemaScorer(Scorer):
         self.schema = self.options.get("schema")
         if not isinstance(self.schema, dict):
             raise GateConfigError("json_schema scorer requires options.schema (an object)")
+        validate_schema_definition(self.schema)
 
     def score_item(self, item: DatasetItem, output: ParsedOutput) -> dict[str, dict]:
         if output.json_obj is None:

@@ -31,6 +31,15 @@ def item_result(applicable: bool, passed: bool | None = None, detail: str | None
     return {"applicable": applicable, "passed": passed, "detail": detail}
 
 
+def json_equal(a, b) -> bool:
+    """Equality under JSON semantics: true != 1 and false != 0 (Python's ==
+    would conflate them because bool subclasses int); numbers still compare
+    across int/float (310 == 310.0)."""
+    if isinstance(a, bool) != isinstance(b, bool):
+        return False
+    return a == b
+
+
 class Scorer(ABC):
     """Subclasses declare the metrics they own in ``metrics``:
     metric key -> {"direction": ..., "kind": ..., "mode": "pass_rate" | "violation_rate"}"""

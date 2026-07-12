@@ -104,6 +104,62 @@ def test_run_command_writes_run_json(mini_gate, tmp_path):
     assert payload["run"]["aggregates"]["quality.pass_rate"]["value"] == 1.0
 
 
+def test_missing_or_typoed_prompt_template_exits_two(mini_gate, capsys, tmp_path):
+    # omitted template -> config error at load time
+    paths = mini_gate()
+    write_json(tmp_path / "candidate.json", {
+        "name": "candidate", "provider": "fake", "model": "m-cand",
+        "prompt": {"system": "answer"},
+        "provider_options": {"fixtures": "fixtures/candidate.json"},
+    })
+    assert main(gate_argv(paths)) == 2
+    assert "prompt.template" in capsys.readouterr().err
+    # typo'd placeholder -> config error instead of a silent garbage prompt
+    write_json(tmp_path / "candidate.json", {
+        "name": "candidate", "provider": "fake", "model": "m-cand",
+        "prompt": {"system": "answer", "template": "$documents\n\n$questoin"},
+        "provider_options": {"fixtures": "fixtures/candidate.json"},
+    })
+    assert main(gate_argv(paths)) == 2
+    assert "questoin" in capsys.readouterr().err
+
+
+def test_breached_warn_rule_annotates_but_passes(mini_gate):
+    # candidate is 3x slower; the only rule on latency is level=warn ->
+    # exit 0, gate verdict pass, and the warning visible in the markdown
+    from conftest import GOOD_RESPONSE
+    slow = {k: {**v, "latency_ms": v["latency_ms"] * 3} for k, v in GOOD_RESPONSE.items()}
+    paths = mini_gate(
+        candidate_responses=slow,
+        thresholds={"rules": [
+            {"metric": "quality.pass_rate", "max_drop_abs": 0.0},
+            {"metric": "latency.p95_ms", "max_increase_pct": 50, "level": "warn"},
+        ]},
+    )
+    assert main(gate_argv(paths)) == 0
+    report = json.loads(open(f"{paths['out']}/report.json", encoding="utf-8").read())
+    assert report["gate"]["verdict"] == "pass"
+    assert report["gate"]["n_warned"] == 1
+    md = open(f"{paths['out']}/report.md", encoding="utf-8").read()
+    assert "WARN" in md and "latency.p95_ms" in md
+
+
+def test_malformed_dataset_exits_two(mini_gate, capsys):
+    dup = {
+        "name": "d", "version": "1", "task": "rag",
+        "items": [
+            {"id": "r1", "input": {"question": "q", "documents": []}, "expected": {}},
+            {"id": "r1", "input": {"question": "q", "documents": []}, "expected": {}},
+        ],
+    }
+    paths = mini_gate(dataset=dup)
+    assert main(gate_argv(paths)) == 2
+    assert "duplicate item id" in capsys.readouterr().err
+    paths = mini_gate(dataset={"name": "d", "version": "1", "task": "rag", "items": []})
+    assert main(gate_argv(paths)) == 2
+    assert "non-empty list" in capsys.readouterr().err
+
+
 def test_internal_errors_exit_two_not_one(mini_gate, monkeypatch, capsys):
     paths = mini_gate()
     import llm_release_gate.cli as cli_mod

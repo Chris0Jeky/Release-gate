@@ -6,8 +6,12 @@ Item input shape:
 
 Output conventions (documented in docs/architecture.md, encoded once here):
 - citations are inline markers  ``[doc:<id>]``
-- an abstention is a reply matching ABSTENTION_PATTERN (e.g. "I don't know",
-  "not enough information") — a convention the app's prompts must also adopt
+- an abstention is a reply that matches ABSTENTION_PATTERN (e.g. "I don't know",
+  "not enough information") AND cites nothing — a hedged reply that still makes
+  a cited claim ("I don't know the clause, but it's 4 weeks [doc:x]") is an
+  answer, and its citations get validated. This is a convention the app's
+  prompts must adopt. Known heuristic limit: a hedge followed by an UNcited
+  claim still reads as an abstention.
 
 The two adapters share mechanics; they differ in the field name the prompt
 template sees ($documents vs $sources), matching how each app talks about its
@@ -35,13 +39,13 @@ def _render_documents(item: DatasetItem) -> str:
 
 def _parse_grounded(text: str) -> ParsedOutput:
     citations = CITATION_PATTERN.findall(text)
-    abstained = bool(ABSTENTION_PATTERN.search(text))
+    abstained = bool(ABSTENTION_PATTERN.search(text)) and not citations
     return ParsedOutput(text=text, citations=citations, abstained=abstained)
 
 
 class RagAdapter(TaskAdapter):
     name = "rag"
-    version = "1"
+    version = "2"  # v2: a citing reply is never an abstention
 
     def prompt_fields(self, item: DatasetItem) -> dict[str, str]:
         return {
@@ -55,7 +59,7 @@ class RagAdapter(TaskAdapter):
 
 class AssistantAdapter(TaskAdapter):
     name = "assistant"
-    version = "1"
+    version = "2"  # v2: a citing reply is never an abstention
 
     def prompt_fields(self, item: DatasetItem) -> dict[str, str]:
         return {

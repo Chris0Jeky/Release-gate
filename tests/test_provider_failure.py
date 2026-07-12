@@ -40,6 +40,30 @@ def test_missing_fixture_file_is_config_error(tmp_path):
         build_provider("fake", {"fixtures": "nope.json"}, str(tmp_path))
 
 
+def test_malformed_fixture_entries_are_config_errors(tmp_path):
+    # negative tokens must never flow into cost totals as measured data
+    write_json(tmp_path / "fx.json", {
+        "version": "1",
+        "responses": {"m": {"x1": {"text": "hi", "prompt_tokens": -5000}}},
+    })
+    with pytest.raises(GateConfigError, match="non-negative integer"):
+        build_provider("fake", {"fixtures": "fx.json"}, str(tmp_path))
+    # string tokens: clean config error, not a mid-run TypeError traceback
+    write_json(tmp_path / "fx2.json", {
+        "version": "1",
+        "responses": {"m": {"x1": {"text": "hi", "prompt_tokens": "312"}}},
+    })
+    with pytest.raises(GateConfigError, match="non-negative integer"):
+        build_provider("fake", {"fixtures": "fx2.json"}, str(tmp_path))
+    # non-dict entry: named clearly instead of crashing on a substring check
+    write_json(tmp_path / "fx3.json", {
+        "version": "1",
+        "responses": {"m": {"x1": "terror occurred"}},
+    })
+    with pytest.raises(GateConfigError, match="item 'x1'"):
+        build_provider("fake", {"fixtures": "fx3.json"}, str(tmp_path))
+
+
 def test_unknown_provider_is_config_error(tmp_path):
     with pytest.raises(GateConfigError, match="unknown provider"):
         build_provider("nonexistent", {}, str(tmp_path))
