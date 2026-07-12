@@ -1,0 +1,20 @@
+{
+  "scorers": [
+    { "type": "field_match" },
+    {
+      "type": "json_schema",
+      "options": {
+        "schema": {
+          "type": "object",
+          "required": ["vendor", "total", "currency", "due_date"],
+          "properties": {
+            "vendor": { "type": "string" },
+            "total": { "type": "number" },
+            "currency": { "type": "string", "enum": ["USD", "EUR", "GBP"] },
+            "due_date": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "_comment": "Candidate = same model, stricter grounding prompt. Fixes the q6 gap (now names both cartridges), slightly longer answers (a little more cost), similar latency. Expected gate verdict: PASS.",
+  "version": "1",
+  "responses": {
+    "demo-pro-1": {
+      "q1": {
+        "text": "Open Settings > Print > Duplex and toggle it on. Duplex printing is supported on the PrintFlow PF-300 and later models. [doc:d1]",
+        "prompt_tokens": 402,
+        "completion_tokens": 63,
+        "latency_ms": 1110.0
+      },
+      "q2": {
+        "text": "The default print resolution is 300 dpi. You can raise it to 1200 dpi under Settings > Print > Quality [doc:d1]; note that higher resolutions increase ink usage. [doc:d2]",
+        "prompt_tokens": 389,
+        "completion_tokens": 71,
+        "latency_ms": 1170.0
+      },
+      "q3": {
+        "text": "Supported paper sizes are A4, Letter and Legal; the rear tray also accepts envelopes. [doc:d1] The supported paper weight range is 60-220 gsm. [doc:d2]",
+        "prompt_tokens": 374,
+        "completion_tokens": 66,
+        "latency_ms": 1060.0
+      },
+      "q4": {
+        "text": "Press and hold the WPS button for 3 seconds, or use the PrintFlow app under Device > Network. [doc:d1] The status LED blinks blue while pairing. [doc:d2]",
+        "prompt_tokens": 386,
+        "completion_tokens": 68,
+        "latency_ms": 1040.0
+      },
+      "q5": {
+        "text": "Open the rear tray, pull the sheet out slowly in the paper path direction, then close the tray; the E13 error clears automatically. [doc:d1] Never pull the paper against the feed direction. [doc:d2]",
+        "prompt_tokens": 410,
+        "completion_tokens": 74,
+        "latency_ms": 1230.0
+      },
+      "q6": {
+        "text": "The PrintFlow PF-500 uses the INK-52 black cartridge and the INK-53 tri-color cartridge. [doc:d1]",
+        "prompt_tokens": 367,
+        "completion_tokens": 44,
+        "latency_ms": 920.0
+      },
+      "q7": {
+        "text": "Install firmware updates from the PrintFlow app under Device > About > Firmware > Update; the printer must stay powered on during the update. [doc:d1]",
+        "prompt_tokens": 395,
+        "completion_tokens": 62,
+        "latency_ms": 1150.0
+      },
+      "q8": {
+        "text": "Yes. Use the PrintFlow app on iOS or Android, or print via standard AirPrint. [doc:d1] The phone and printer must share a network. [doc:d2]",
+        "prompt_tokens": 369,
+        "completion_tokens": 58,
+        "latency_ms": 980.0
+      }
+    }
+  }
+}

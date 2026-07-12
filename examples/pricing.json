@@ -1,0 +1,9 @@
+{
+  "_comment": "FICTIONAL models and prices for the offline demo (fake provider). Real deployments maintain their own pricing table, bump 'version' on every price change, and the version+hash land in the run manifest.",
+  "version": "demo-2026-07",
+  "currency": "USD",
+  "models": {
+    "demo-pro-1": { "input_per_mtok": 12.0, "output_per_mtok": 60.0 },
+    "demo-mini-1": { "input_per_mtok": 0.6, "output_per_mtok": 2.4 }
+  }
+}

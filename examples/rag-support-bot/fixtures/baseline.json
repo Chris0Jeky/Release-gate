@@ -1,0 +1,56 @@
+{
+  "_comment": "Deterministic replay fixtures for the fake provider. In a real deployment these would be recorded transcripts of the live baseline. q6 deliberately omits the INK-53 cartridge: the live bot has one known quality gap (7/8).",
+  "version": "1",
+  "responses": {
+    "demo-pro-1": {
+      "q1": {
+        "text": "To enable duplex printing, open Settings > Print > Duplex and toggle it on. Note that duplex is only supported on the PF-300 and later models. [doc:d1]",
+        "prompt_tokens": 384,
+        "completion_tokens": 58,
+        "latency_ms": 1080.0
+      },
+      "q2": {
+        "text": "The default resolution is 300 dpi, and you can raise it up to 1200 dpi under Settings > Print > Quality. [doc:d1] Keep in mind higher resolutions use more ink. [doc:d2]",
+        "prompt_tokens": 371,
+        "completion_tokens": 64,
+        "latency_ms": 1145.0
+      },
+      "q3": {
+        "text": "The printer supports A4, Letter and Legal paper sizes, and the rear tray also accepts envelopes. [doc:d1]",
+        "prompt_tokens": 356,
+        "completion_tokens": 49,
+        "latency_ms": 990.0
+      },
+      "q4": {
+        "text": "Press and hold the WPS button for 3 seconds, or connect through the PrintFlow app under Device > Network. [doc:d1]",
+        "prompt_tokens": 368,
+        "completion_tokens": 52,
+        "latency_ms": 1010.0
+      },
+      "q5": {
+        "text": "Open the rear tray and pull the jammed sheet out slowly in the paper path direction, then close the tray — the E13 error clears automatically. [doc:d1]",
+        "prompt_tokens": 392,
+        "completion_tokens": 61,
+        "latency_ms": 1190.0
+      },
+      "q6": {
+        "text": "The PF-500 uses the INK-52 black cartridge. [doc:d1]",
+        "prompt_tokens": 349,
+        "completion_tokens": 31,
+        "latency_ms": 870.0
+      },
+      "q7": {
+        "text": "Firmware updates are installed from the PrintFlow app: go to Device > About > Firmware > Update, and keep the printer powered on during the update. [doc:d1]",
+        "prompt_tokens": 377,
+        "completion_tokens": 59,
+        "latency_ms": 1120.0
+      },
+      "q8": {
+        "text": "Yes — install the PrintFlow app on iOS or Android, or print via standard AirPrint. [doc:d1]",
+        "prompt_tokens": 351,
+        "completion_tokens": 42,
+        "latency_ms": 930.0
+      }
+    }
+  }
+}

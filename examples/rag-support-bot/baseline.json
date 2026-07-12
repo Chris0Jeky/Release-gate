@@ -1,0 +1,11 @@
+{
+  "name": "support-bot-v3 (live)",
+  "provider": "fake",
+  "model": "demo-pro-1",
+  "params": { "temperature": 0.0, "max_tokens": 400 },
+  "prompt": {
+    "system": "You are the PrintFlow support assistant. Answer only from the provided documents and cite every claim with [doc:id] markers.",
+    "template": "Documents:\n$documents\n\nQuestion: $question"
+  },
+  "provider_options": { "fixtures": "fixtures/baseline.json" }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "invoice-extraction-golden",
+  "version": "1.0.0",
+  "task": "extraction",
+  "items": [
+    {
+      "id": "inv1",
+      "input": { "text": "Invoice #4411 from Acme Corp. Total due: $1,250.50. Payment due by 2026-08-01." },
+      "expected": { "fields": { "vendor": "Acme Corp", "total": 1250.5, "currency": "USD", "due_date": "2026-08-01" } }
+    },
+    {
+      "id": "inv2",
+      "input": { "text": "Rechnung von Müller GmbH über 980,00 EUR, fällig am 15.08.2026." },
+      "expected": { "fields": { "vendor": "Müller GmbH", "total": 980.0, "currency": "EUR", "due_date": "2026-08-15" } }
+    },
+    {
+      "id": "inv3",
+      "input": { "text": "Northwind Traders bills £4,520.75, net 30, due 2026-09-10." },
+      "expected": { "fields": { "vendor": "Northwind Traders", "total": 4520.75, "currency": "GBP", "due_date": "2026-09-10" } }
+    },
+    {
+      "id": "inv4",
+      "input": { "text": "INVOICE — Globex LLC. Amount: 310 USD. Due date: 2026-07-30." },
+      "expected": { "fields": { "vendor": "Globex LLC", "total": 310, "currency": "USD", "due_date": "2026-07-30" } }
+    },
+    {
+      "id": "inv5",
+      "input": { "text": "Initech invoice: total $99.99, due 2026-08-20." },
+      "expected": { "fields": { "vendor": "Initech", "total": 99.99, "currency": "USD", "due_date": "2026-08-20" } }
+    },
+    {
+      "id": "inv6",
+      "input": { "text": "Facture: Café Lumière, 2 450,00 EUR, échéance 2026-09-01." },
+      "expected": { "fields": { "vendor": "Café Lumière", "total": 2450.0, "currency": "EUR", "due_date": "2026-09-01" } }
+    }
+  ]
+}

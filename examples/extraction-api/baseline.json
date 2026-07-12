@@ -1,0 +1,11 @@
+{
+  "name": "extractor-v2 (live, demo-pro-1)",
+  "provider": "fake",
+  "model": "demo-pro-1",
+  "params": { "temperature": 0.0, "max_tokens": 200 },
+  "prompt": {
+    "system": "Extract invoice fields. Reply with a single JSON object with keys vendor, total, currency, due_date (ISO 8601). No prose.",
+    "template": "Invoice text:\n$text"
+  },
+  "provider_options": { "fixtures": "fixtures/baseline.json" }
+}

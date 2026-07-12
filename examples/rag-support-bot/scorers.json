@@ -1,0 +1,6 @@
+{
+  "scorers": [
+    { "type": "keyword_quality" },
+    { "type": "citations" }
+  ]
+}

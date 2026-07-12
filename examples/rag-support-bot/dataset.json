@@ -1,0 +1,119 @@
+{
+  "name": "printflow-support-golden",
+  "version": "1.0.0",
+  "task": "rag",
+  "items": [
+    {
+      "id": "q1",
+      "input": {
+        "question": "How do I enable duplex printing?",
+        "documents": [
+          { "id": "d1", "text": "Duplex printing: open Settings > Print > Duplex and toggle it on. Duplex is supported on PrintFlow PF-300 and later models." },
+          { "id": "d2", "text": "The PrintFlow app is available for iOS and Android." }
+        ]
+      },
+      "expected": {
+        "quality": { "must_contain": ["duplex", "settings"] },
+        "must_cite": ["d1"]
+      }
+    },
+    {
+      "id": "q2",
+      "input": {
+        "question": "What is the default print resolution and can I change it?",
+        "documents": [
+          { "id": "d1", "text": "The default print resolution is 300 dpi. It can be raised to 1200 dpi under Settings > Print > Quality." },
+          { "id": "d2", "text": "Higher resolutions increase ink usage." }
+        ]
+      },
+      "expected": {
+        "quality": { "must_contain": ["300", "1200"] },
+        "must_cite": ["d1"]
+      }
+    },
+    {
+      "id": "q3",
+      "input": {
+        "question": "Which paper sizes are supported?",
+        "documents": [
+          { "id": "d1", "text": "Supported paper sizes: A4, Letter and Legal. The rear tray accepts envelopes." },
+          { "id": "d2", "text": "Paper weight range: 60-220 gsm." }
+        ]
+      },
+      "expected": {
+        "quality": { "must_contain": ["a4", "letter", "legal"] },
+        "must_cite": ["d1"]
+      }
+    },
+    {
+      "id": "q4",
+      "input": {
+        "question": "How do I connect the printer to Wi-Fi?",
+        "documents": [
+          { "id": "d1", "text": "To connect to Wi-Fi, press and hold the WPS button for 3 seconds, or use the PrintFlow app under Device > Network." },
+          { "id": "d2", "text": "The status LED blinks blue while pairing." }
+        ]
+      },
+      "expected": {
+        "quality": { "must_contain": ["wps"] },
+        "must_cite": ["d1"]
+      }
+    },
+    {
+      "id": "q5",
+      "input": {
+        "question": "How do I clear a paper jam?",
+        "documents": [
+          { "id": "d1", "text": "Paper jam (error E13): open the rear tray, pull the sheet out slowly in the paper path direction, then close the tray. The E13 error clears automatically." },
+          { "id": "d2", "text": "Never pull jammed paper against the feed direction." }
+        ]
+      },
+      "expected": {
+        "quality": { "must_contain": ["rear", "e13"] },
+        "must_cite": ["d1"]
+      }
+    },
+    {
+      "id": "q6",
+      "input": {
+        "question": "What ink cartridges does the PF-500 use?",
+        "documents": [
+          { "id": "d1", "text": "The PrintFlow PF-500 uses the INK-52 black cartridge and the INK-53 tri-color cartridge." },
+          { "id": "d2", "text": "Third-party cartridges void the warranty." }
+        ]
+      },
+      "expected": {
+        "quality": { "must_contain": ["ink-52", "ink-53"] },
+        "must_cite": ["d1"]
+      }
+    },
+    {
+      "id": "q7",
+      "input": {
+        "question": "How do I update the firmware?",
+        "documents": [
+          { "id": "d1", "text": "Firmware updates are installed from the PrintFlow app: Device > About > Firmware > Update. The printer must stay powered on during the update." },
+          { "id": "d2", "text": "Firmware release notes are published on the support site." }
+        ]
+      },
+      "expected": {
+        "quality": { "must_contain": ["firmware", "app"] },
+        "must_cite": ["d1"]
+      }
+    },
+    {
+      "id": "q8",
+      "input": {
+        "question": "Can I print from my phone?",
+        "documents": [
+          { "id": "d1", "text": "Mobile printing is supported through the PrintFlow app on iOS and Android, or via standard AirPrint." },
+          { "id": "d2", "text": "The app requires the phone and printer to share a network." }
+        ]
+      },
+      "expected": {
+        "quality": { "must_contain": ["app"] },
+        "must_cite": ["d1"]
+      }
+    }
+  ]
+}

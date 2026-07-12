@@ -1,0 +1,11 @@
+{
+  "name": "support-bot-v4 (candidate: stricter grounding prompt)",
+  "provider": "fake",
+  "model": "demo-pro-1",
+  "params": { "temperature": 0.0, "max_tokens": 400 },
+  "prompt": {
+    "system": "You are the PrintFlow support assistant. Answer only from the provided documents. Quote every model number, part number and setting name exactly as written, and cite every claim with [doc:id] markers. If the documents do not answer the question, say you don't know.",
+    "template": "Documents:\n$documents\n\nQuestion: $question"
+  },
+  "provider_options": { "fixtures": "fixtures/candidate.json" }
+}

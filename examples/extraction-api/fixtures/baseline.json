@@ -1,0 +1,44 @@
+{
+  "_comment": "Live extractor on demo-pro-1: 6/6 correct, all schema-valid.",
+  "version": "1",
+  "responses": {
+    "demo-pro-1": {
+      "inv1": {
+        "text": "{\"vendor\": \"Acme Corp\", \"total\": 1250.5, \"currency\": \"USD\", \"due_date\": \"2026-08-01\"}",
+        "prompt_tokens": 182,
+        "completion_tokens": 41,
+        "latency_ms": 810.0
+      },
+      "inv2": {
+        "text": "{\"vendor\": \"Müller GmbH\", \"total\": 980.0, \"currency\": \"EUR\", \"due_date\": \"2026-08-15\"}",
+        "prompt_tokens": 176,
+        "completion_tokens": 42,
+        "latency_ms": 795.0
+      },
+      "inv3": {
+        "text": "{\"vendor\": \"Northwind Traders\", \"total\": 4520.75, \"currency\": \"GBP\", \"due_date\": \"2026-09-10\"}",
+        "prompt_tokens": 179,
+        "completion_tokens": 43,
+        "latency_ms": 840.0
+      },
+      "inv4": {
+        "text": "{\"vendor\": \"Globex LLC\", \"total\": 310, \"currency\": \"USD\", \"due_date\": \"2026-07-30\"}",
+        "prompt_tokens": 171,
+        "completion_tokens": 39,
+        "latency_ms": 760.0
+      },
+      "inv5": {
+        "text": "{\"vendor\": \"Initech\", \"total\": 99.99, \"currency\": \"USD\", \"due_date\": \"2026-08-20\"}",
+        "prompt_tokens": 168,
+        "completion_tokens": 38,
+        "latency_ms": 750.0
+      },
+      "inv6": {
+        "text": "{\"vendor\": \"Café Lumière\", \"total\": 2450.0, \"currency\": \"EUR\", \"due_date\": \"2026-09-01\"}",
+        "prompt_tokens": 174,
+        "completion_tokens": 42,
+        "latency_ms": 805.0
+      }
+    }
+  }
+}

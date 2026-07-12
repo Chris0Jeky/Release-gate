@@ -1,0 +1,9 @@
+{
+  "rules": [
+    { "metric": "quality.pass_rate", "max_drop_abs": 0.05 },
+    { "metric": "citations.valid_rate", "max_drop_abs": 0.0 },
+    { "metric": "cost.total_usd", "max_increase_pct": 25 },
+    { "metric": "latency.p95_ms", "max_increase_pct": 50, "level": "warn" },
+    { "metric": "errors.error_rate", "max_value": 0.0 }
+  ]
+}
