@@ -39,6 +39,23 @@ def test_unavailable_cost_is_labeled_not_zero(mini_gate):
     assert "no pricing table supplied" in html
 
 
+def test_markdown_surfaces_partial_coverage_note(mini_gate):
+    # Candidate reports latency for only 1 of 3 answered items -> the runner marks
+    # latency.p95 AVAILABLE with a coverage note. The markdown PR comment must show
+    # that note (as the HTML already does) so a subset percentile is never read as a
+    # full-run value with a misleading delta.
+    partial = {k: dict(v) for k, v in GOOD_RESPONSE.items()}
+    partial["r2"].pop("latency_ms")
+    partial["r3"].pop("latency_ms")
+    paths = mini_gate(candidate_responses=partial)
+    assert main(gate_argv(paths)) == 0
+    report, md, html = _reports(paths)
+    note = report["metrics"]["latency.p95_ms"]["candidate"]["note"]
+    assert note == "latency reported for 1 of 3 answered items"
+    assert note in md
+    assert note in html  # both renderers agree; the caveat is not dropped in either
+
+
 def test_html_escapes_model_output(mini_gate):
     hostile = {k: dict(v) for k, v in GOOD_RESPONSE.items()}
     hostile["r1"]["text"] = 'The sky is blue <script>alert("x")</script> [doc:s1]'

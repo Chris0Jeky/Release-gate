@@ -54,14 +54,18 @@ def render_markdown(report: dict) -> str:
         if is_heuristic(entry["baseline"]) or is_heuristic(entry["candidate"]):
             mark = " †"
             heuristic_used = True
-        b_txt = fmt_value(entry["baseline"])
-        c_txt = fmt_value(entry["candidate"])
+        cells = {}
         for side, m in (("b", entry["baseline"]), ("c", entry["candidate"])):
             if not m["available"] and m["note"]:
-                if side == "b":
-                    b_txt = f"unavailable ({m['note']})"
-                else:
-                    c_txt = f"unavailable ({m['note']})"
+                cells[side] = f"unavailable ({m['note']})"
+            elif m["note"]:
+                # An AVAILABLE metric can still carry a caveat (partial-coverage
+                # latency, cost/token basis). Surface it — matching the HTML report —
+                # so a subset percentile is never shown as a bare full-run value.
+                cells[side] = f"{fmt_value(m)} ({m['note']})"
+            else:
+                cells[side] = fmt_value(m)
+        b_txt, c_txt = cells["b"], cells["c"]
         gate_cells = [
             f"{_VERDICT_ICON[r['verdict']]} {verdict_word(r['verdict'])}"
             for r in rules_by_metric.get(key, [])
