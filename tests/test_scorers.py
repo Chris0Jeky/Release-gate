@@ -211,6 +211,24 @@ def test_json_semantics_bool_is_not_int():
     assert r["quality.pass_rate"]["passed"] is False
 
 
+def test_json_equal_keeps_bool_distinct_from_int_at_any_depth():
+    from llm_release_gate.scorers import json_equal
+    # bool != int inside nested lists and dicts (the top-level guard is not enough)
+    assert json_equal([True, False], [1, 0]) is False
+    assert json_equal({"flags": [True]}, {"flags": [1]}) is False
+    assert json_equal({"a": {"b": False}}, {"a": {"b": 0}}) is False
+    # genuine matches still hold, including int/float crossing at depth
+    assert json_equal([1, 2.0], [1.0, 2]) is True
+    assert json_equal({"a": [True, 3]}, {"a": [True, 3.0]}) is True
+    assert json_equal({"x": 1}, {"x": 1, "y": 2}) is False  # differing key sets
+    # field_match end-to-end: a nested bool-vs-int is a real mismatch, not a pass
+    scorer = FieldMatchScorer({})
+    adapter = ExtractionAdapter()
+    item = DatasetItem(id="x", input={"text": "t"}, expected={"fields": {"flags": [True, False]}})
+    r = scorer.score_item(item, adapter.parse('{"flags": [1, 0]}', item))
+    assert r["quality.pass_rate"]["passed"] is False
+
+
 def test_json_schema_scorer_counts_parse_failures_as_invalid():
     scorer = JsonSchemaScorer({"schema": {"type": "object"}})
     adapter = ExtractionAdapter()

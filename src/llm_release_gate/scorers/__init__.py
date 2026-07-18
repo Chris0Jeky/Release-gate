@@ -32,11 +32,17 @@ def item_result(applicable: bool, passed: bool | None = None, detail: str | None
 
 
 def json_equal(a, b) -> bool:
-    """Equality under JSON semantics: true != 1 and false != 0 (Python's ==
-    would conflate them because bool subclasses int); numbers still compare
-    across int/float (310 == 310.0)."""
-    if isinstance(a, bool) != isinstance(b, bool):
-        return False
+    """Equality under JSON semantics, structurally at every depth: true != 1 and
+    false != 0 (Python's == would conflate them because bool subclasses int),
+    while numbers still compare across int/float (310 == 310.0). Lists and dicts
+    are compared element-wise so the bool/int distinction also holds inside nested
+    values — a top-level-only guard would let {"flags": [1, 0]} match [true, false]."""
+    if isinstance(a, bool) or isinstance(b, bool):
+        return isinstance(a, bool) and isinstance(b, bool) and a == b
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(json_equal(x, y) for x, y in zip(a, b))
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(json_equal(a[k], b[k]) for k in a)
     return a == b
 
 
