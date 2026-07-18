@@ -2,12 +2,15 @@
 
 import json
 
+import pytest
+
 from llm_release_gate.cli import main
-from llm_release_gate.loading import PricingTable, no_pricing
+from llm_release_gate.errors import GateConfigError
+from llm_release_gate.loading import PricingTable, load_pricing, no_pricing
 from llm_release_gate.pricing import item_cost_usd
 from llm_release_gate.providers import ProviderResult
 
-from conftest import GOOD_RESPONSE, gate_argv
+from conftest import GOOD_RESPONSE, gate_argv, write_json
 
 PRICING = PricingTable(
     version="test-1", currency="USD",
@@ -35,6 +38,17 @@ def test_model_not_in_pricing_table_names_the_version():
     cost, note = item_cost_usd(r, PRICING)
     assert cost is None
     assert "other" in note and "test-1" in note
+
+
+def test_boolean_pricing_rate_is_rejected(tmp_path):
+    # JSON booleans are int subclasses; an accepted `true` price would be used as
+    # 1.0 and fabricate a cost. Must be a config error (exit 2), like bad thresholds.
+    path = write_json(tmp_path / "pricing.json", {
+        "version": "bad", "currency": "USD",
+        "models": {"m": {"input_per_mtok": True, "output_per_mtok": 1.0}},
+    })
+    with pytest.raises(GateConfigError, match="input_per_mtok"):
+        load_pricing(path)
 
 
 def test_no_pricing_table_supplied():

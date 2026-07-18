@@ -34,6 +34,13 @@ def _require(data: dict, key: str, path: str, what: str) -> Any:
     return data[key]
 
 
+def _is_number(value: Any) -> bool:
+    """A real JSON number. bool is an int subclass in Python, so a bare
+    isinstance(x, (int, float)) is True for True/False; a JSON boolean is never a
+    numeric threshold or price and must be rejected, not silently used as 1/0."""
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
 # ---------------------------------------------------------------- dataset
 
 
@@ -201,7 +208,7 @@ def load_thresholds(path: str) -> Thresholds:
                 f"expected one of {', '.join(_CONSTRAINT_KEYS)}"
             )
         for key, val in constraints.items():
-            if not isinstance(val, (int, float)) or isinstance(val, bool):
+            if not _is_number(val):
                 raise GateConfigError(
                     f"thresholds {path}: rule #{i} constraint '{key}' must be a number"
                 )
@@ -246,8 +253,8 @@ def load_pricing(path: str) -> PricingTable:
     for model, entry in models.items():
         if (
             not isinstance(entry, dict)
-            or not isinstance(entry.get("input_per_mtok"), (int, float))
-            or not isinstance(entry.get("output_per_mtok"), (int, float))
+            or not _is_number(entry.get("input_per_mtok"))
+            or not _is_number(entry.get("output_per_mtok"))
         ):
             raise GateConfigError(
                 f"pricing table {path}: model '{model}' needs numeric "
