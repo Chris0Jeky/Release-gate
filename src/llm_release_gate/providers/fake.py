@@ -87,6 +87,10 @@ class FakeProvider(Provider):
             raise GateConfigError(f"fake provider fixtures {path}: expected {{'responses': {{...}}}}")
         _validate_fixtures(data["responses"], path)
         self.fixtures_path = path
+        # The config-relative reference (what the run config actually wrote). Unlike
+        # the resolved absolute path, it is stable across checkout locations, so it is
+        # safe to surface in per-item error messages that land in report.json.
+        self.fixtures_ref = fixtures
         self.fixtures_sha256 = file_sha256(path)
         self.responses: dict = data["responses"]
 
@@ -94,13 +98,13 @@ class FakeProvider(Provider):
         by_model = self.responses.get(request.model)
         if by_model is None:
             raise ProviderError(
-                f"no fixtures for model '{request.model}' in {self.fixtures_path}"
+                f"no fixtures for model '{request.model}' in {self.fixtures_ref}"
             )
         entry = by_model.get(request.item_id)
         if entry is None:
             raise ProviderError(
                 f"no fixture for item '{request.item_id}' under model "
-                f"'{request.model}' in {self.fixtures_path}"
+                f"'{request.model}' in {self.fixtures_ref}"
             )
         if "error" in entry:
             raise ProviderError(f"simulated provider failure: {entry['error']}")
@@ -118,9 +122,14 @@ class FakeProvider(Provider):
         )
 
     def describe(self) -> dict:
+        # Identity is the fixtures' CONTENT hash, never their filesystem location:
+        # this block is embedded in report.json and folded into result_hash, which
+        # must stay path-free so identical inputs hash identically no matter where
+        # the repo is checked out (reproducibility contract). The absolute path is
+        # volatile and is not part of what produced the verdict; fixtures_sha256 is
+        # the reproducible identity, and the manifest already records the config paths.
         return {
             "name": self.name,
-            "fixtures_path": self.fixtures_path,
             "fixtures_sha256": self.fixtures_sha256,
         }
 

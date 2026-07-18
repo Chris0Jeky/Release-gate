@@ -2,6 +2,7 @@
 result hash; volatile data (timestamps, paths) lives only in the manifest."""
 
 import json
+import shutil
 
 from llm_release_gate.cli import main
 
@@ -37,6 +38,41 @@ def test_report_carries_no_timestamps_or_paths(mini_gate):
     assert "created_at" not in text
     # input identity is by hash, not by filesystem location
     assert paths["dataset"].replace("\\", "/") not in text.replace("\\\\", "/")
+    # the fake provider's fixtures identity is its content hash, never its path:
+    # an absolute fixtures path would make result_hash depend on checkout location
+    assert "fixtures_path" not in text
+    assert report["runs"]["baseline"]["provider"]["fixtures_sha256"].startswith("sha256:")
+
+
+def test_result_hash_stable_across_input_location(mini_gate, tmp_path):
+    # Byte-identical inputs run from a DIFFERENT directory must produce a
+    # byte-identical report and the same result_hash. Regression guard for the
+    # absolute-fixtures-path leak: the earlier same-dir test could not catch it
+    # because the path was constant across both runs.
+    paths = mini_gate()
+    assert main(gate_argv(paths)) == 0
+    report_a = open(f"{paths['out']}/report.json", encoding="utf-8").read()
+
+    loc2 = tmp_path / "relocated"
+    (loc2 / "fixtures").mkdir(parents=True)
+    for name in ("dataset", "baseline", "candidate", "scorers", "thresholds", "pricing"):
+        shutil.copy(paths[name], loc2 / f"{name}.json")
+    for name in ("baseline", "candidate"):
+        shutil.copy(f"{paths['tmp']}/fixtures/{name}.json", loc2 / "fixtures" / f"{name}.json")
+    argv = [
+        "gate",
+        "--dataset", str(loc2 / "dataset.json"),
+        "--baseline", str(loc2 / "baseline.json"),
+        "--candidate", str(loc2 / "candidate.json"),
+        "--scorers", str(loc2 / "scorers.json"),
+        "--thresholds", str(loc2 / "thresholds.json"),
+        "--pricing", str(loc2 / "pricing.json"),
+        "--out", str(loc2 / "out"),
+    ]
+    assert main(argv) == 0
+    report_b = open(f"{loc2}/out/report.json", encoding="utf-8").read()
+    assert report_a == report_b
+    assert json.loads(report_a)["result_hash"] == json.loads(report_b)["result_hash"]
 
 
 def test_manifest_pins_inputs_and_result(mini_gate):

@@ -25,6 +25,20 @@ def test_missing_fixture_raises_provider_error(tmp_path):
         provider.complete(_req("unknown-model", "x1"))
 
 
+def test_provider_error_message_is_location_stable(tmp_path):
+    # A missing-fixture error is recorded per item and lands in report.json;
+    # embedding the absolute fixtures path would make result_hash depend on where
+    # the repo is checked out (same class as the fixtures_path leak). The message
+    # must use the config-relative reference instead.
+    write_json(tmp_path / "fixtures" / "fx.json", {"version": "1", "responses": {"m": {}}})
+    provider = build_provider("fake", {"fixtures": "fixtures/fx.json"}, str(tmp_path))
+    with pytest.raises(ProviderError) as excinfo:
+        provider.complete(_req("m", "x1"))
+    msg = str(excinfo.value)
+    assert "fixtures/fx.json" in msg      # location-stable config reference
+    assert str(tmp_path) not in msg       # never the absolute checkout path
+
+
 def test_simulated_error_entry(tmp_path):
     write_json(tmp_path / "fx.json", {
         "version": "1",
