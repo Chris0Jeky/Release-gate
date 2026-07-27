@@ -23,8 +23,8 @@ replays committed fixtures, so tests, demos and CI need no API key. v0.1.0, no t
 | red demo | `make demo-red` | gate FAIL, exit 1 (that is success) |
 | what CI runs | `make ci` | test + demo-green + demo-red |
 
-`make` resolves under Git Bash on this box. Without it, each Makefile target prints the
-exact `python -m llm_release_gate gate --dataset … --out …` argument list — copy from there.
+`make` resolves under Git Bash on this box; without it, copy the exact
+`python -m llm_release_gate gate --dataset … --out …` argument list out of the Makefile.
 
 **Worktree trap (measured).** The editable install resolves to the MAIN checkout, so a bare
 `python -m pytest` inside a linked worktree silently tests the *other* tree's source. In a
@@ -53,14 +53,11 @@ Touching schemas, metric keys, exit codes or CLI flags: run `make ci` before pus
 
 `loading` (parse + sha256 the five inputs) → `runner` (adapter → provider → parse → score,
 once per config) → `gate` (threshold engine, report assembly) → `reports/` + `manifest`.
-Three extension seams, all plain-dict registries populated at import:
-
-- `providers/` — `fake` only (deterministic replay, keyed by model + item_id)
-- `adapters/` — `rag`, `assistant`, `extraction`
-- `scorers/` — `keyword_quality`, `field_match`, `abstention`, `citations`, `json_schema`
-
-Pipeline + schemas: `docs/architecture.md` · extending: `docs/extending.md` · test map:
-`docs/testing.md`.
+Three extension seams, all plain-dict registries populated at import: `providers/` (`fake`
+only — deterministic replay keyed by model + item_id), `adapters/` (`rag`, `assistant`,
+`extraction`), `scorers/` (`keyword_quality`, `field_match`, `abstention`, `citations`,
+`json_schema`). Pipeline + schemas: `docs/architecture.md` · extending:
+`docs/extending.md` · test map: `docs/testing.md`.
 
 ## Invariants (violating one is a bug, not a style choice)
 
@@ -99,6 +96,5 @@ in the same commit, and README output blocks must match what the code actually p
 
 ## Growth
 
-`NEXT.md` holds the trigger → feature table (build on the trigger, not before) and the
-non-goals. Open human decisions — Action reference name, tags, PyPI, Marketplace — live in
-`HUMAN_TODO.md`.
+`NEXT.md` — trigger → feature table (build on the trigger, not before) and the non-goals.
+`HUMAN_TODO.md` — open human decisions: Action reference name, tags, PyPI, Marketplace.
