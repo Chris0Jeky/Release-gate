@@ -48,12 +48,12 @@ low-risk, current behavior verified correct by trace):
 - Baseline-side provider errors end-to-end (the "baseline run had N/M provider errors"
   notice; `mini_gate` already accepts `baseline_responses` for this).
 
-## Verified runs (re-measured 2026-07-27, Windows, Python 3.14.3; CI mirrors on ubuntu 3.11/3.13)
+## Verified runs (2026-07-18, Windows 10, Python 3.14.3; CI mirrors on ubuntu 3.11/3.13)
 
 `python -m pytest` →
 
 ```
-80 passed in 0.47s
+80 passed in 0.45s
 ```
 
 `make demo-green` → both gates PASS, exit 0. RAG example (prompt improvement):
@@ -68,7 +68,7 @@ llm-release-gate: gate FAIL
   [FAIL] quality.pass_rate: drop 0.375 vs allowed 0.1
   [FAIL] abstention.false_answer_rate: candidate 1 vs allowed maximum 0
   [FAIL] citations.valid_rate: drop 0.3 vs allowed 0.05
-  result hash: sha256:71f399669c374b121f99e9a88c610c2a165a007397c774f9f5ffcee5456979cc
+  result hash: sha256:0a80717c3a4d5ec1774891dd455e057af1b84e3189521c347eac16db489837e3
 OK: regression correctly blocked (exit 1)
 ```
 
