@@ -1,46 +1,100 @@
-# CLAUDE.md — Release-gate
+# CLAUDE.md — Release-gate (`llm-release-gate`)
 
-Tier: sandbox (T1) — authority: push free / merge free · single-runtime (Claude).
-Harness bootstrapped 2026-07-12 per `agent-harness/BLUEPRINT.md` §1 (T1 Sandbox).
+**T2 daily driver** · push free / merge free · single-runtime (Claude) · tier + flags:
+`.agent-harness/tier.json` · human decisions: `HUMAN_TODO.md`. Global laws are injected
+from `~/.claude/CLAUDE.md`; this file carries only what is true of *this* repo.
 
 ## What this is
 
-Release-gate — an open-source CLI + GitHub Action that blocks unsafe changes to a
-repo's prompts, model, retrieval, tools, or config from being merged. Given a versioned
-golden/replay dataset, a baseline config, a candidate config, and quality/cost/latency
-thresholds, it runs both configs, compares them, writes a report, comments on the PR,
-and fails the check on a material regression. Full concept: `README.md`.
+Open-source CLI + GitHub Action that blocks unsafe LLM-app changes. Given five pinned JSON
+inputs (dataset, baseline config, candidate config, scorers, thresholds — plus an optional
+pricing table) it runs baseline and candidate over the golden dataset, scores both, writes
+`report.{json,md,html}` + `manifest.json`, and exits **0 pass / 1 regression blocked /
+2 could-not-run**. Zero runtime dependencies; offline by default — the `fake` provider
+replays committed fixtures, so tests, demos and CI need no API key. v0.1.0, no tags cut.
 
-## How to run
+## Run it (measured 2026-07-27, Windows, Python 3.14.3)
 
-Python ≥3.11, stdlib-only runtime (pytest for dev). Implemented 2026-07-12; the package
-is `llm-release-gate` (CLI: `python -m llm_release_gate`).
+| Goal | Command | Result here |
+|---|---|---|
+| dev install | `make install` (`pip install -e ".[dev]"`) | — |
+| full suite | `python -m pytest` | `80 passed in 0.47s` |
+| green demos | `make demo-green` | both gates PASS, exit 0 |
+| red demo | `make demo-red` | gate FAIL, exit 1 (that is success) |
+| what CI runs | `make ci` | test + demo-green + demo-red |
 
-- `make install` · `make test` · `make demo-green` (exit 0) · `make demo-red` (must exit 1)
-- `make ci` = what `.github/workflows/ci.yml` runs (plus an action.yml self-test lane).
-- Windows: run make targets under Git Bash, or use the underlying `python -m` commands.
-- `examples/assistant-cheap-regression` is deliberately red — never "fix" it.
-- Agent working agreements + invariants: `AGENTS.md`. Docs: `docs/`, growth: `NEXT.md`.
+`make` resolves under Git Bash on this box; without it, copy the exact
+`python -m llm_release_gate gate --dataset … --out …` argument list out of the Makefile.
 
-## Rules (T1 — keep it minimal)
+**Worktree trap (measured).** The editable install resolves to the MAIN checkout, so a bare
+`python -m pytest` inside a linked worktree silently tests the *other* tree's source. In a
+worktree, prefix everything: `PYTHONPATH=src python -m pytest`, `PYTHONPATH=src python -m
+llm_release_gate …`.
 
-- **The floor is the one guardrail.** The global PreToolUse deny hook
-  (`~/.claude/hooks/dispatch.py`, floor v1.3.0) rides along and blocks only the
-  irreversible: force-push, `rm -rf` outside the repo, pipe-to-shell, `sudo`, secret-file
-  writes. It fires even under `bypassPermissions`. Do NOT add a repo hook copy — it would
-  double-spawn against the global one.
-- **Permissions are `bypassPermissions`** (gitignored `.claude/settings.local.json`) — max
-  trust by design at T1. Committed `.claude/settings.json` keeps `acceptEdits` + the deny
-  floor as the safe baseline for fresh clones.
-- No secrets in the repo. This tool calls model APIs; keys come from the environment,
-  never committed — that keeps the repo plain (no `sensitive_data` flag).
-- Small diffs, commit per logical group; plain `git push` to `main` is fine (solo).
-- Work inline. No subagent fan-out at T1 — it is always cheaper to stay inline here.
+## Proving checks by seam
+
+Run the narrowest row that covers your diff; each is well under a second.
+
+| You changed | Run (`pytest` = `python -m pytest`) |
+|---|---|
+| `scorers/`, `adapters/` | `pytest tests/test_scorers.py` (20) |
+| `gate.py`, threshold rules | `pytest tests/test_verdicts.py` (15) |
+| `reports/`, `metrics.py` | `pytest tests/test_reports.py` (5) |
+| `pricing.py` | `pytest tests/test_cost.py` (7) |
+| `cli.py`, exit codes, GH env vars | `pytest tests/test_cli.py` (13) |
+| `providers/`, `runner.py` | `pytest tests/test_provider_failure.py` (8) |
+| anything in the report dict | `pytest tests/test_hashing.py tests/test_reproducibility.py` (12) |
+| `examples/`, fixtures, thresholds | `make demo-green && make demo-red` |
+| `action.yml` | not runnable locally — the CI `action-self-test` lane is the only proof |
+
+Touching schemas, metric keys, exit codes or CLI flags: run `make ci` before pushing.
+
+## Map
+
+`loading` (parse + sha256 the five inputs) → `runner` (adapter → provider → parse → score,
+once per config) → `gate` (threshold engine, report assembly) → `reports/` + `manifest`.
+Three extension seams, all plain-dict registries populated at import: `providers/` (`fake`
+only — deterministic replay keyed by model + item_id), `adapters/` (`rag`, `assistant`,
+`extraction`), `scorers/` (`keyword_quality`, `field_match`, `abstention`, `citations`,
+`json_schema`). Pipeline + schemas: `docs/architecture.md` · extending:
+`docs/extending.md` · test map: `docs/testing.md`.
+
+## Invariants (violating one is a bug, not a style choice)
+
+1. **Never fabricate numbers.** Unknown tokens/latency stay `None`; unknown cost is
+   *unavailable + reason*. No defaults, no estimates, no partial sums shown as totals.
+2. **Fail closed.** Unevaluable rules fail; misconfiguration is exit 2, never a silent pass;
+   provider errors surface in `errors.error_rate` (implicit rule if you do not gate on it).
+3. **Reproducible report.** `report.json` holds no timestamps and no filesystem paths —
+   volatile context lives in `manifest.json`. New report fields must be deterministic.
+4. **Honest presentation.** Rates ship with sample counts; heuristic scores are labeled
+   `kind: "heuristic_rate"`, never called probabilities or accuracy.
+5. **Exit codes are API** — so are Makefile target names, CLI flags, input schemas and
+   metric keys. Breaking one is a major-version event.
+6. **One owner per metric.** Scorers declare direction/kind/mode and skip inapplicable items
+   rather than passing them.
+7. **Zero runtime dependencies.** A new runtime dep needs a NEXT.md-level justification.
+
+New behavior lands with the test that pins it; schema/metric/command changes update the docs
+in the same commit, and README output blocks must match what the code actually prints.
+
+## Pitfalls
+
+- `examples/assistant-cheap-regression` is *deliberately* red — never "fix" it; CI asserts
+  it fails the gate. The two green examples must likewise keep exiting 0.
+- `action.yml` passes inputs through `env:`, never `${{ }}` inside a `run:` body (expression
+  injection). Keep it that way, and keep the PR-comment step non-fatal: a missing
+  `pull-requests: write` is a warning; the gate's verdict decides the check.
+- Docs quote measured numbers (test count, demo result hashes, cost deltas). Change behavior
+  → re-run and re-quote. A stale hash in `docs/testing.md` is a false measurement, not a typo.
+- `out/` is gitignored build output, not source.
+- The deny floor is deliberately **not** vendored here — it arrives from the global
+  PreToolUse hook; a repo copy would double-spawn against it.
+- **No secrets, ever.** No real provider exists yet; when one lands it reads keys from the
+  environment only (`os.environ[...]`, `docs/extending.md`) — never a config file, never
+  committed. That first adapter also triggers a `sensitive_data` flag review (`NEXT.md`).
 
 ## Growth
 
-Promote to T2 on durable use — a 3rd+ return session, another consumer, or the first
-"wish I had a test" moment (likely soon: this ships a CLI + Action others run). Then add
-SessionStart orientation, HUMAN_TODO, a BACKLOG, and a CI lane per the blueprint. Until
-then add nothing speculative (second-occurrence rule). Tier/authority: `.claude/tier.json`;
-estate row: `~/.claude/ESTATE.md`.
+`NEXT.md` — trigger → feature table (build on the trigger, not before) and the non-goals.
+`HUMAN_TODO.md` — open human decisions: Action reference name, tags, PyPI, Marketplace.
