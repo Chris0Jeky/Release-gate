@@ -137,7 +137,7 @@ fake provider replays committed fixtures byte-for-byte.
 - [docs/architecture.md](docs/architecture.md) — pipeline, schemas, metric and verdict semantics, reproducibility contract
 - [docs/testing.md](docs/testing.md) — test map plus verified commands and outputs
 - [docs/extending.md](docs/extending.md) — adding providers, task adapters and scorers
-- [AGENTS.md](AGENTS.md) — working agreements for coding agents
+- [CLAUDE.md](CLAUDE.md) — working agreements for coding agents: commands, per-seam proving checks, invariants, pitfalls
 - [NEXT.md](NEXT.md) — what would make this grow into a release-management platform (and what won't)
 
 ## License

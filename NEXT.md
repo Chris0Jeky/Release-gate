@@ -30,8 +30,8 @@ means build).
 
 ## Housekeeping triggers
 
-- 3rd returning work session or first external contributor → promote repo tier per
-  `CLAUDE.md` Growth section (orientation hooks, HUMAN_TODO, backlog).
+- ~~3rd returning work session or first external contributor → promote repo tier.~~
+  Done 2026-07-27: promoted to **T2** (`.agent-harness/tier.json`), `HUMAN_TODO.md` seeded.
 - First real provider adapter → CI secret handling + a `sensitive_data` review of the
   estate flags.
 - First external user report → versioning discipline: changelog + semver, freeze input
