@@ -1,4 +1,4 @@
-# CLAUDE.md — Release-gate (`llm-release-gate`)
+# CLAUDE.md — llm-release-gate
 
 **T2 daily driver** · push free / merge free · single-runtime (Claude) · tier + flags:
 `.agent-harness/tier.json` · human decisions: `HUMAN_TODO.md`. Global laws are injected
@@ -11,7 +11,8 @@ inputs (dataset, baseline config, candidate config, scorers, thresholds — plus
 pricing table) it runs baseline and candidate over the golden dataset, scores both, writes
 `report.{json,md,html}` + `manifest.json`, and exits **0 pass / 1 regression blocked /
 2 could-not-run**. Zero runtime dependencies; offline by default — the `fake` provider
-replays committed fixtures, so tests, demos and CI need no API key. v0.1.0, no tags cut.
+replays committed fixtures, so tests, demos and CI need no API key. Package version is v0.1.0;
+the current public-release stage lives in `ORCHESTRATOR.md`.
 
 ## Run it (measured 2026-08-02, Windows, Python 3.14.3)
 
@@ -30,6 +31,20 @@ replays committed fixtures, so tests, demos and CI need no API key. v0.1.0, no t
 `python -m pytest` inside a linked worktree silently tests the *other* tree's source. In a
 worktree, prefix everything: `PYTHONPATH=src python -m pytest`, `PYTHONPATH=src python -m
 llm_release_gate …`.
+
+## Cold start and progression
+
+Read `~/.claude/ESTATE.md` before working an unfamiliar checkout, then read `AGENTS.md`, this
+file, `.agent-harness/tier.json`, `ORCHESTRATOR.md`, `HUMAN_TODO.md`, and `NEXT.md`. Refresh
+`git status --short --branch`, worktree occupancy, `origin/main`, open PRs/issues/checks/review
+threads, and GitHub release/tag state. The ledger supplies the release/maintenance ladder and
+exact resume point; live evidence outranks it.
+
+Finish an in-flight PR, exact-head failure, or confirmed correctness/security/data-loss defect
+first. Otherwise take the smallest reversible stage task with a named proving check. If an
+owner-only gate blocks that stage, record one clear question and evidence in `HUMAN_TODO.md`,
+update the ledger checkpoint, and continue with the next safe stage. Do not invent provider,
+publishing, harness, scheduler, or platform work merely to fill the queue.
 
 ## Proving checks by seam
 

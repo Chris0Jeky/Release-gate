@@ -29,7 +29,7 @@ dev = ["pytest>=8"]
 llm-release-gate = "llm_release_gate.cli:main"
 
 [project.urls]
-Repository = "https://github.com/Chris0Jeky/Release-gate"
+Repository = "https://github.com/Chris0Jeky/llm-release-gate"
 
 [tool.setuptools.packages.find]
 where = ["src"]
