@@ -99,6 +99,10 @@ alone), each at level `fail` or `warn`. See `examples/*/thresholds.json`.
 
 ## GitHub Action
 
+The public `v0` reference is created with the initial `v0.1.0` release. Until that release is
+visible, no remote Action reference is available: clone this repository to run its CLI/examples,
+or use `uses: ./` only from a workflow inside a checkout of this repository.
+
 ```yaml
 permissions:
   contents: read
@@ -106,7 +110,7 @@ permissions:
                          # becomes a warning and the verdict still stands
 steps:
   - uses: actions/checkout@v4
-  - uses: your-org/llm-release-gate@v0   # or a local checkout: uses: ./
+  - uses: Chris0Jeky/llm-release-gate@v0 # or, inside this repo's checkout only: uses: ./
     with:
       dataset: eval/dataset.json
       baseline: eval/baseline.json
@@ -121,6 +125,10 @@ The Action installs the CLI, runs the gate, writes the job summary, posts the Ma
 report as a PR comment (also when it fails — that's the point), and fails the check on
 regression. Outputs: `verdict`, `result-hash`, `report-json|md|html`. This repo's own CI
 self-tests the Action on both the green and the red example.
+
+`@v0` is the compatibility reference for the latest verified 0.x release. Pin a full commit
+SHA when an immutable supply-chain reference is required. The repository never moves `v0`
+outside a reviewed 0.x release.
 
 ## Examples
 
