@@ -91,3 +91,35 @@ def test_gating_on_unavailable_cost_fails_closed(mini_gate):
     rule = next(r for r in report["rules"] if r["metric"] == "cost.total_usd")
     assert rule["verdict"] == "fail"
     assert "on_unavailable=fail" in rule["message"]
+
+
+def test_skip_policy_cost_flows_through_cli_and_renderers(mini_gate):
+    degraded = {k: dict(v) for k, v in GOOD_RESPONSE.items()}
+    degraded["r2"].pop("prompt_tokens")
+    degraded["r2"].pop("completion_tokens")
+    paths = mini_gate(
+        candidate_responses=degraded,
+        thresholds={"rules": [{
+            "metric": "cost.total_usd",
+            "max_increase_pct": 25,
+            "on_unavailable": "skip",
+        }]},
+    )
+
+    assert main(gate_argv(paths)) == 0
+    report = json.loads(open(f"{paths['out']}/report.json", encoding="utf-8").read())
+    assert report["gate"]["verdict"] == "pass"
+    rule = next(r for r in report["rules"] if r["metric"] == "cost.total_usd")
+    assert rule["verdict"] == "skipped"
+    assert rule["on_unavailable"] == "skip"
+    assert rule["checks"][0]["status"] == "unavailable"
+    assert "on_unavailable=skip" in rule["checks"][0]["message"]
+
+    markdown = open(f"{paths['out']}/report.md", encoding="utf-8").read()
+    cost_row = next(line for line in markdown.splitlines() if line.startswith("| cost.total_usd |"))
+    assert "⏭️ SKIPPED" in cost_row
+
+    html = open(f"{paths['out']}/report.html", encoding="utf-8").read()
+    assert "<td>cost.total_usd</td>" in html
+    assert '<span class="badge skipped">SKIPPED</span>' in html
+    assert "on_unavailable=skip" in html

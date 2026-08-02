@@ -22,7 +22,7 @@ production.
 
 ```bash
 make install     # pip install -e ".[dev]"
-make test        # 83 tests, < 1 s
+make test        # 84 tests, < 1 s
 make demo-green  # two safe changes -> gate PASS (exit 0)
 make demo-red    # a deliberate regression -> gate FAIL (exit 1)
 ```
