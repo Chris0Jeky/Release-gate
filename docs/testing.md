@@ -59,7 +59,7 @@ llm-release-gate: gate FAIL
   [FAIL] quality.pass_rate: drop 0.375 vs allowed 0.1
   [FAIL] abstention.false_answer_rate: candidate 1 vs allowed maximum 0
   [FAIL] citations.valid_rate: drop 0.3 vs allowed 0.05
-  result hash: sha256:49e6a79ab9f79dee2e8e8e5415cd59c8ae26ec9a2d259a5e50912d15b49a49d4
+  result hash: sha256:df684a0135c1cce66ca8977cd5c8234d710324010125e27c828d2fcecbb282f8
 OK: regression correctly blocked (exit 1)
 ```
 
