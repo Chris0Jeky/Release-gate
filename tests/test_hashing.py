@@ -2,7 +2,12 @@ import json
 
 import pytest
 
-from llm_release_gate.hashing import canonical_json, content_hash, file_sha256
+from llm_release_gate.hashing import (
+    canonical_json,
+    content_hash,
+    file_sha256,
+    json_source_sha256,
+)
 
 
 def test_key_order_does_not_change_hash():
@@ -39,3 +44,13 @@ def test_file_sha256_matches_bytes(tmp_path):
     p.write_bytes(b'{"a": 1}')
     import hashlib
     assert file_sha256(str(p)) == "sha256:" + hashlib.sha256(b'{"a": 1}').hexdigest()
+
+
+def test_json_source_sha256_normalizes_physical_line_endings_only():
+    lf = b'{\n  "a": 1\n}\n'
+    crlf = lf.replace(b"\n", b"\r\n")
+    legacy_cr = lf.replace(b"\n", b"\r")
+
+    assert json_source_sha256(lf) == json_source_sha256(crlf)
+    assert json_source_sha256(lf) == json_source_sha256(legacy_cr)
+    assert json_source_sha256(lf) != json_source_sha256(b'{\n  "a": 2\n}\n')

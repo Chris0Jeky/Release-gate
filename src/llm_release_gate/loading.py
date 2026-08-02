@@ -1,7 +1,8 @@
 """Loading + validation of the five gate inputs.
 
-Each loader returns the parsed object plus the sha256 of the file bytes, so the
-manifest pins exactly what was on disk. Validation failures raise GateConfigError
+Each loader returns the parsed object plus a line-ending-normalized sha256 of
+the JSON source, so the manifest pins what produced a verdict. Validation
+failures raise GateConfigError
 (CLI exit 2) with a message naming the file and the problem — a misconfigured
 gate must never silently pass.
 """
@@ -14,18 +15,19 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from .errors import GateConfigError
-from .hashing import file_sha256
+from .hashing import json_source_sha256
 
 
 def _load_json_file(path: str, what: str) -> tuple[Any, str]:
     if not os.path.isfile(path):
         raise GateConfigError(f"{what} file not found: {path}")
     try:
-        with open(path, "r", encoding="utf-8") as fh:
-            data = json.load(fh)
+        with open(path, "rb") as fh:
+            source = fh.read()
+        data = json.loads(source.decode("utf-8"))
     except json.JSONDecodeError as exc:
         raise GateConfigError(f"{what} file is not valid JSON: {path} ({exc})") from exc
-    return data, file_sha256(path)
+    return data, json_source_sha256(source)
 
 
 def _require(data: dict, key: str, path: str, what: str) -> Any:

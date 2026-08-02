@@ -25,7 +25,7 @@ One pipeline, five pinned inputs, one auditable verdict.
 
 | Module | Owns |
 |---|---|
-| `loading.py` | parsing + validation of the five inputs; every loader returns the file's sha256 |
+| `loading.py` | parsing + validation of the five inputs; every loader returns a line-ending-normalized JSON source sha256 |
 | `providers/` | `Provider` interface + registry; `fake.py` is the deterministic replay provider |
 | `adapters/` | `TaskAdapter` interface + registry; item → prompt fields, raw text → `ParsedOutput` |
 | `scorers/` | `Scorer` interface + registry + uniform aggregation; each metric has exactly one owner |
@@ -95,6 +95,9 @@ change.
   sha256 of its canonical JSON (sorted keys, compact separators, NaN rejected).
 - Identical inputs ⇒ byte-identical reports and equal result hashes (enforced by
   `tests/test_reproducibility.py`).
+- Input and fake-fixture hashes normalize only physical JSON line endings (CRLF or lone
+  CR to LF). Escaped `\\r` and `\\n` inside JSON values remain distinct; formatting and
+  substantive source changes remain pinned.
 - `manifest.json` holds the volatile context: input paths and hashes, fixture hashes,
   pricing-table version, tool version, wall-clock `created_at`, and the `result_hash` it
   vouches for.

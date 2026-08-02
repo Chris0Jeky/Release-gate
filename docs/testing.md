@@ -4,7 +4,7 @@
 
 ```bash
 make install      # pip install -e ".[dev]"
-make test         # pytest (80 tests)
+make test         # pytest (82 tests)
 make demo-green   # both green examples; target fails unless both exit 0
 make demo-red     # red example; target fails unless the gate exits exactly 1
 make ci           # test + demo-green + demo-red (what CI runs)
@@ -29,6 +29,9 @@ math, provider failure, report honesty, exit codes — not line-coverage maximiz
 | `test_reports.py` | rates rendered with sample counts; heuristic footnote present; unavailable cost labeled with its reason (and no fabricated `$0`); partial-coverage latency note surfaced in the markdown PR comment, not only the HTML; HTML escapes model output; failing items carry actionable detail |
 | `test_cli.py` | exit 0 (both green examples), exit 1 (red example, naming the regressions), exit 2 (missing file, bad rule, metric without scorer, missing/typo'd prompt template, malformed dataset, internal error); breached warn-level rule annotates but exits 0; `GITHUB_STEP_SUMMARY` / `GITHUB_OUTPUT` writing; `hash` and `run` subcommands |
 
+The reproducibility tests also prove that changing only physical JSON source line endings
+(LF, CRLF, or lone CR) leaves the report, result hash, and fake-fixture identities unchanged.
+
 The shared fixture (`conftest.mini_gate`) builds a tiny 3-item grounded gate on disk;
 tests break exactly one thing per case.
 
@@ -48,12 +51,12 @@ low-risk, current behavior verified correct by trace):
 - Baseline-side provider errors end-to-end (the "baseline run had N/M provider errors"
   notice; `mini_gate` already accepts `baseline_responses` for this).
 
-## Verified runs (2026-07-18, Windows 10, Python 3.14.3; CI mirrors on ubuntu 3.11/3.13)
+## Verified runs (2026-08-02, Windows 10, Python 3.14.3; CI mirrors on ubuntu 3.11/3.13)
 
 `python -m pytest` →
 
 ```
-80 passed in 0.45s
+82 passed in 0.62s
 ```
 
 `make demo-green` → both gates PASS, exit 0. RAG example (prompt improvement):
