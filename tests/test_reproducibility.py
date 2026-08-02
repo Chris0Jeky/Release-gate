@@ -3,6 +3,7 @@ result hash; volatile data (timestamps, paths) lives only in the manifest."""
 
 import json
 import shutil
+from pathlib import Path
 
 from llm_release_gate.cli import main
 
@@ -73,6 +74,54 @@ def test_result_hash_stable_across_input_location(mini_gate, tmp_path):
     report_b = open(f"{loc2}/out/report.json", encoding="utf-8").read()
     assert report_a == report_b
     assert json.loads(report_a)["result_hash"] == json.loads(report_b)["result_hash"]
+
+
+def test_result_hash_is_invariant_to_json_source_line_endings(mini_gate, tmp_path):
+    paths = mini_gate()
+    assert main(gate_argv(paths)) == 0
+    report_a = open(f"{paths['out']}/report.json", encoding="utf-8").read()
+
+    def copy_as_crlf(source, destination):
+        raw = Path(source).read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        destination.write_bytes(raw.replace(b"\n", b"\r\n"))
+
+    crlf_root = tmp_path / "crlf"
+    (crlf_root / "fixtures").mkdir(parents=True)
+    sources = {
+        "dataset": (paths["dataset"], crlf_root / "dataset.json"),
+        "baseline": (paths["baseline"], crlf_root / "baseline.json"),
+        "candidate": (paths["candidate"], crlf_root / "candidate.json"),
+        "scorers": (paths["scorers"], crlf_root / "scorers.json"),
+        "thresholds": (paths["thresholds"], crlf_root / "thresholds.json"),
+        "pricing": (paths["pricing"], crlf_root / "pricing.json"),
+    }
+    for key, (source, destination) in sources.items():
+        copy_as_crlf(source, destination)
+        sources[key] = str(destination)
+    for name in ("baseline", "candidate"):
+        source = Path(paths["tmp"]) / "fixtures" / f"{name}.json"
+        destination = crlf_root / "fixtures" / f"{name}.json"
+        copy_as_crlf(source, destination)
+
+    crlf_paths = {
+        **{key: destination for key, destination in sources.items()},
+        "out": str(crlf_root / "out"),
+    }
+    assert main(gate_argv(crlf_paths)) == 0
+    report_b = open(f"{crlf_paths['out']}/report.json", encoding="utf-8").read()
+
+    assert report_a == report_b
+    parsed_a = json.loads(report_a)
+    parsed_b = json.loads(report_b)
+    assert parsed_a["result_hash"] == parsed_b["result_hash"]
+    assert (
+        parsed_a["runs"]["baseline"]["provider"]["fixtures_sha256"]
+        == parsed_b["runs"]["baseline"]["provider"]["fixtures_sha256"]
+    )
+    assert (
+        parsed_a["runs"]["candidate"]["provider"]["fixtures_sha256"]
+        == parsed_b["runs"]["candidate"]["provider"]["fixtures_sha256"]
+    )
 
 
 def test_manifest_pins_inputs_and_result(mini_gate):

@@ -13,12 +13,12 @@ pricing table) it runs baseline and candidate over the golden dataset, scores bo
 2 could-not-run**. Zero runtime dependencies; offline by default — the `fake` provider
 replays committed fixtures, so tests, demos and CI need no API key. v0.1.0, no tags cut.
 
-## Run it (measured 2026-07-27, Windows, Python 3.14.3)
+## Run it (measured 2026-08-02, Windows, Python 3.14.3)
 
 | Goal | Command | Result here |
 |---|---|---|
 | dev install | `make install` (`pip install -e ".[dev]"`) | — |
-| full suite | `python -m pytest` | `80 passed in 0.47s` |
+| full suite | `python -m pytest` | `82 passed in 0.62s` |
 | green demos | `make demo-green` | both gates PASS, exit 0 |
 | red demo | `make demo-red` | gate FAIL, exit 1 (that is success) |
 | what CI runs | `make ci` | test + demo-green + demo-red |

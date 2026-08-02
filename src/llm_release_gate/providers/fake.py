@@ -30,7 +30,7 @@ import json
 import os
 
 from ..errors import GateConfigError, ProviderError
-from ..hashing import file_sha256
+from ..hashing import json_source_sha256
 from . import Provider, ProviderRequest, ProviderResult, register_provider
 
 
@@ -79,8 +79,9 @@ class FakeProvider(Provider):
         if not os.path.isfile(path):
             raise GateConfigError(f"fake provider fixture file not found: {path}")
         try:
-            with open(path, "r", encoding="utf-8") as fh:
-                data = json.load(fh)
+            with open(path, "rb") as fh:
+                source = fh.read()
+            data = json.loads(source.decode("utf-8"))
         except json.JSONDecodeError as exc:
             raise GateConfigError(f"fake provider fixtures not valid JSON: {path} ({exc})") from exc
         if not isinstance(data, dict) or not isinstance(data.get("responses"), dict):
@@ -91,7 +92,7 @@ class FakeProvider(Provider):
         # the resolved absolute path, it is stable across checkout locations, so it is
         # safe to surface in per-item error messages that land in report.json.
         self.fixtures_ref = fixtures
-        self.fixtures_sha256 = file_sha256(path)
+        self.fixtures_sha256 = json_source_sha256(source)
         self.responses: dict = data["responses"]
 
     def complete(self, request: ProviderRequest) -> ProviderResult:

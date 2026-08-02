@@ -1,10 +1,10 @@
-"""Canonical hashing.
+"""Hashing for JSON gate inputs and generated artifacts.
 
-Every artifact the gate consumes (dataset, configs, scorer config, thresholds,
-pricing table) and the comparison result itself are identified by a sha256 over
-a canonical JSON encoding, so a manifest pins exactly what produced a verdict.
-
-Canonical form: sorted keys, compact separators, UTF-8, NaN/Infinity rejected.
+Reports use a canonical JSON encoding. JSON source files use a byte-level hash
+after normalizing only physical line endings, so a CRLF checkout produces the
+same audit identity as an LF checkout without collapsing meaningful JSON
+formatting or value changes. ``file_sha256`` remains a standard raw-byte hash
+for the generic CLI command.
 """
 
 from __future__ import annotations
@@ -33,8 +33,21 @@ def content_hash(obj: Any) -> str:
     return HASH_PREFIX + digest
 
 
+def json_source_sha256(source: bytes) -> str:
+    """Hash valid JSON source bytes with physical line endings normalized.
+
+    JSON cannot contain literal CR or LF inside a string, so normalizing CRLF
+    and legacy lone-CR line endings affects only source layout. Escaped
+    ``\\r`` and ``\\n`` remain distinct JSON values. Keeping this separate from
+    :func:`file_sha256` preserves the generic CLI's standard byte checksum.
+    """
+    normalized = source.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    digest = hashlib.sha256(normalized).hexdigest()
+    return HASH_PREFIX + digest
+
+
 def file_sha256(path: str) -> str:
-    """sha256 over raw file bytes (for pinning files exactly as committed)."""
+    """sha256 over raw file bytes (a standard byte-level checksum)."""
     h = hashlib.sha256()
     with open(path, "rb") as fh:
         for chunk in iter(lambda: fh.read(65536), b""):
