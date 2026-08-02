@@ -5,7 +5,7 @@ documentation.
 
 ## Run header
 
-- **Base:** `main` at `e0b22a5` (2026-08-02 post-merge); working branch: `chore/orchestration-ledger`
+- **Base:** `main` at `69b5c73` (2026-08-02 post-merge); working branch: `chore/orchestration-ledger`
 - **Authority:** T2 `daily-driver` from `.agent-harness/tier.json`; push and merge are free, with
   the repository gate still required.
 - **Goal:** triage live work, advance small safe slices, and leave evidence-backed checkpoints.
@@ -37,7 +37,7 @@ per PR; do not copy the generic two-review rule from `orc.txt`.
 | T-002 | Close documented low-risk testing gaps (current slice: baseline-side provider-error notice) | MERGED | low | T-001 merged; focused triage | [PR #4](https://github.com/Chris0Jeky/Release-gate/pull/4), merge `566c002b` | post-merge reconciliation: no reviews/comments/threads present | PR #4 merged 2026-08-02 16:19:44Z; post-merge CI run `30756377935` succeeded at exact head `566c002b`; fresh-review LOW observation remains informational/nonblocking. |
 | T-003 | Reconcile open PRs, CI, and review threads before selecting more work | VERIFIED | high | live GitHub state | none | not applicable (inventory) | Initial inventory completed before PR #3; its checks and review state are tracked under T-001. |
 | T-004 | Add all-items-errored latency no-fabrication guard | MERGED | low | T-002 merged; existing provider-failure test | [PR #5](https://github.com/Chris0Jeky/Release-gate/pull/5), head `ebc8737`, merge `e0b22a5` | independent narrow review: no findings; post-merge no reviews/comments/threads | PR #5 merged 2026-08-02 16:28:55Z; latency metrics are unavailable with value `None` and note `provider reported no latency`. |
-| T-005 | Exercise `on_unavailable: skip` through CLI and renderers | IN-PROGRESS | low | T-004 merged | isolated branch `test/skip-policy-renderers` from `e0b22a5` | one bounded review | One separate test/docs slice; outcome not yet determined. Do not batch with another gap. |
+| T-005 | Exercise `on_unavailable: skip` through CLI and renderers | MERGED | low | T-004 merged | [PR #6](https://github.com/Chris0Jeky/Release-gate/pull/6), head `2ecb64b`, merge `69b5c73` | independent narrow review: no findings; post-merge no reviews/comments/threads | PR #6 merged 2026-08-02 16:39:50Z; the candidate unavailable cost rule is skipped and renders through JSON, Markdown, and HTML. |
 
 ## Human-owned questions
 
@@ -50,7 +50,7 @@ per PR; do not copy the generic two-review rule from `orc.txt`.
 
 ## Verification baseline
 
-Current baseline: `PYTHONPATH=src py -3 -m pytest` (83 tests), `make demo-green`, `make demo-red`,
+Current baseline: `PYTHONPATH=src py -3 -m pytest` (84 tests), `make demo-green`, `make demo-red`,
 and `make ci` (test plus both demos). PR #3 evidence: `PYTHONPATH=src py -3 -m pytest` → **82
 passed**; under Git-for-Windows Bash, `PYTHONPATH=src make ci` passed and preserved the red-demo
 hash. In a linked worktree use `PYTHONPATH=src` before Python commands because editable installs
@@ -60,7 +60,9 @@ here. PR #4 evidence: provider suite 9 passed, full suite 83 passed, and Git-Bas
 Hosted CI evidence: PR run `30291002316` succeeded; post-merge run `30755966014` succeeded at
 exact head `2a1e6a7`; PR #4 post-merge run `30756377935` succeeded at exact head `566c002b`; PR #5
 pre-merge run `30756695591` had all three jobs succeed at `ebc8737`; post-merge run `30756726049`
-succeeded at exact head `e0b22a5`. This operational-ledger update is verified with `git diff --check`.
+succeeded at exact head `e0b22a5`; PR #6 pre-merge run `30757007282` had all three jobs succeed at
+`2ecb64b`; post-merge run `30757135915` succeeded at exact head `69b5c73`. The full-suite baseline is
+now 84 tests. This operational-ledger update is verified with `git diff --check`.
 
 ## Findings and failures
 
@@ -75,6 +77,9 @@ succeeded at exact head `e0b22a5`. This operational-ledger update is verified wi
   fix cascade.
 - **F-003 (PR #5 review):** Independent narrow review found no findings; immediate post-merge
   reconciliation found no PR #5 reviews, comments, or threads.
+- **F-004 (PR #6 review):** Independent narrow review found no findings; immediate post-merge
+  reconciliation found no PR #6 reviews, comments, or threads. The candidate unavailable cost rule
+  is skipped and rendered through JSON, Markdown, and HTML as intended.
 - **Environment workaround:** a WSL-vs-Git-for-Windows Bash command-path mismatch required running
   `PYTHONPATH=src make ci` under Git Bash; this is environment evidence, not a product failure.
 - **Failures:** none in the recorded PR checks; tie any future red check to its exact head and
@@ -88,11 +93,17 @@ succeeded at exact head `e0b22a5`. This operational-ledger update is verified wi
 - **Current checkpoint:** PR #4 merged 2026-08-02 16:19:44Z as `566c002b`; immediate post-merge
   reconciliation found no PR #4 reviews, comments, or threads; post-merge CI `30756377935` passed
   at that exact head.
-- **Current checkpoint:** PR #5 merged 2026-08-02 16:28:55Z as `e0b22a5`; pre-merge CI
+- **Prior checkpoint:** PR #5 merged 2026-08-02 16:28:55Z as `e0b22a5`; pre-merge CI
   `30756695591` had all three jobs succeed at `ebc8737`; post-merge CI `30756726049` succeeded at
   that exact head. Independent narrow review found no findings, and immediate post-merge
   reconciliation found no PR #5 reviews, comments, or threads. Local `main` and `origin/main` match
   `e0b22a5`.
-- **Exact resume point:** T-005 is IN-PROGRESS on isolated branch `test/skip-policy-renderers` from
-  `e0b22a5`; exercise `on_unavailable: skip` through CLI and renderers as one separate test/docs
-  slice. Do not predeclare its outcome or batch it with another gap.
+- **Current checkpoint:** PR #6 merged 2026-08-02 16:39:50Z as `69b5c73`; pre-merge CI
+  `30757007282` had all three jobs succeed at `2ecb64b`; post-merge CI `30757135915` succeeded at
+  that exact head. Independent narrow review found no findings, and immediate post-merge
+  reconciliation found no PR #6 reviews, comments, or threads. Local `main` and `origin/main` match
+  `69b5c73`; the full-suite baseline is 84 tests.
+- **Exact resume point:** No unblocked product work remains after T-005 merged. HUMAN_TODO q-1
+  through q-4 remain open (published Action reference, PyPI, Marketplace, and real-provider/secrets
+  decisions); resume only when a human resolves one or new scoped work is authorized. Do not invent
+  additional product tasks.
