@@ -5,7 +5,7 @@ documentation.
 
 ## Run header
 
-- **Base:** `main` at `2a1e6a7` (2026-08-02 post-merge); working branch: `chore/orchestration-ledger`
+- **Base:** `main` at `e0b22a5` (2026-08-02 post-merge); working branch: `chore/orchestration-ledger`
 - **Authority:** T2 `daily-driver` from `.agent-harness/tier.json`; push and merge are free, with
   the repository gate still required.
 - **Goal:** triage live work, advance small safe slices, and leave evidence-backed checkpoints.
@@ -34,8 +34,10 @@ per PR; do not copy the generic two-review rule from `orc.txt`.
 | ID | Title | Status | Priority | Dependencies | PR / branch | Review | Outcome |
 |---|---|---|---|---|---|---|---|
 | T-001 | Issue #1: normalize JSON input line endings before semantic hashing | MERGED | high | triage complete | [PR #3](https://github.com/Chris0Jeky/Release-gate/pull/3), merge `2a1e6a7` | post-merge reconciliation: no reviews/comments/threads present | PR #3 merged 2026-08-02 16:08:48Z; issue #1 closed/completed; local `main` and `origin/main` equal `2a1e6a7`. |
-| T-002 | Close documented low-risk testing gaps: CLI/renderers `on_unavailable: skip`, all-items-errored latency fabrication guard, and baseline-side provider errors | SELECTED | low | T-001 merged; focused triage | isolated branch (next) | one bounded review per slice | Next safe queue item; triage the three documented gaps, then choose one small slice rather than batching them. |
+| T-002 | Close documented low-risk testing gaps (current slice: baseline-side provider-error notice) | MERGED | low | T-001 merged; focused triage | [PR #4](https://github.com/Chris0Jeky/Release-gate/pull/4), merge `566c002b` | post-merge reconciliation: no reviews/comments/threads present | PR #4 merged 2026-08-02 16:19:44Z; post-merge CI run `30756377935` succeeded at exact head `566c002b`; fresh-review LOW observation remains informational/nonblocking. |
 | T-003 | Reconcile open PRs, CI, and review threads before selecting more work | VERIFIED | high | live GitHub state | none | not applicable (inventory) | Initial inventory completed before PR #3; its checks and review state are tracked under T-001. |
+| T-004 | Add all-items-errored latency no-fabrication guard | MERGED | low | T-002 merged; existing provider-failure test | [PR #5](https://github.com/Chris0Jeky/Release-gate/pull/5), head `ebc8737`, merge `e0b22a5` | independent narrow review: no findings; post-merge no reviews/comments/threads | PR #5 merged 2026-08-02 16:28:55Z; latency metrics are unavailable with value `None` and note `provider reported no latency`. |
+| T-005 | Exercise `on_unavailable: skip` through CLI and renderers | IN-PROGRESS | low | T-004 merged | isolated branch `test/skip-policy-renderers` from `e0b22a5` | one bounded review | One separate test/docs slice; outcome not yet determined. Do not batch with another gap. |
 
 ## Human-owned questions
 
@@ -48,14 +50,17 @@ per PR; do not copy the generic two-review rule from `orc.txt`.
 
 ## Verification baseline
 
-Current baseline: `PYTHONPATH=src py -3 -m pytest` (82 tests), `make demo-green`, `make demo-red`,
+Current baseline: `PYTHONPATH=src py -3 -m pytest` (83 tests), `make demo-green`, `make demo-red`,
 and `make ci` (test plus both demos). PR #3 evidence: `PYTHONPATH=src py -3 -m pytest` → **82
 passed**; under Git-for-Windows Bash, `PYTHONPATH=src make ci` passed and preserved the red-demo
 hash. In a linked worktree use `PYTHONPATH=src` before Python commands because editable installs
 resolve the main checkout. `action.yml`'s self-test lane is CI-only. Run the narrowest seam check
 for each change, then the declared gate when risk warrants it; record failures and workarounds
-here. Hosted CI evidence: PR run `30291002316` succeeded; post-merge run `30755966014` succeeded
-at exact head `2a1e6a7`. This documentation-only ledger update is verified with `git diff --check`.
+here. PR #4 evidence: provider suite 9 passed, full suite 83 passed, and Git-Bash `make ci` passed.
+Hosted CI evidence: PR run `30291002316` succeeded; post-merge run `30755966014` succeeded at
+exact head `2a1e6a7`; PR #4 post-merge run `30756377935` succeeded at exact head `566c002b`; PR #5
+pre-merge run `30756695591` had all three jobs succeed at `ebc8737`; post-merge run `30756726049`
+succeeded at exact head `e0b22a5`. This operational-ledger update is verified with `git diff --check`.
 
 ## Findings and failures
 
@@ -65,6 +70,11 @@ at exact head `2a1e6a7`. This documentation-only ledger update is verified with 
   loaded-input and fake-fixture hashing; generic raw `file_sha256` and CLI behavior remain unchanged.
   Fresh-context code review found no CRITICAL, HIGH, or MEDIUM findings. LOW notes (lone-CR E2E and
   CLI raw-hash assertion) are informational/nonblocking; no fix cascade.
+- **F-002 (PR #4 review):** Fresh-context review found no blocking defects. The LOW observation
+  that tests do not separately assert baseline run/item accounting is informational/nonblocking; no
+  fix cascade.
+- **F-003 (PR #5 review):** Independent narrow review found no findings; immediate post-merge
+  reconciliation found no PR #5 reviews, comments, or threads.
 - **Environment workaround:** a WSL-vs-Git-for-Windows Bash command-path mismatch required running
   `PYTHONPATH=src make ci` under Git Bash; this is environment evidence, not a product failure.
 - **Failures:** none in the recorded PR checks; tie any future red check to its exact head and
@@ -72,9 +82,17 @@ at exact head `2a1e6a7`. This documentation-only ledger update is verified with 
 
 ## Checkpoint and resume
 
-- **Current checkpoint:** PR #3 merged 2026-08-02 16:08:48Z as `2a1e6a7`; issue #1 is
+- **Prior checkpoint:** PR #3 merged 2026-08-02 16:08:48Z as `2a1e6a7`; issue #1 is
   closed/completed; local `main` and `origin/main` are equal at that head. Immediate post-merge
   reconciliation found no PR #3 reviews, comments, or threads; post-merge CI `30755966014` passed.
-- **Exact resume point:** focus triage of T-002's three documented coverage gaps from `2a1e6a7`,
-  create/use an isolated branch, and select one small slice (do not batch the gaps). Run its focused
-  checks and one bounded review, then update this ledger with the exact head and evidence.
+- **Current checkpoint:** PR #4 merged 2026-08-02 16:19:44Z as `566c002b`; immediate post-merge
+  reconciliation found no PR #4 reviews, comments, or threads; post-merge CI `30756377935` passed
+  at that exact head.
+- **Current checkpoint:** PR #5 merged 2026-08-02 16:28:55Z as `e0b22a5`; pre-merge CI
+  `30756695591` had all three jobs succeed at `ebc8737`; post-merge CI `30756726049` succeeded at
+  that exact head. Independent narrow review found no findings, and immediate post-merge
+  reconciliation found no PR #5 reviews, comments, or threads. Local `main` and `origin/main` match
+  `e0b22a5`.
+- **Exact resume point:** T-005 is IN-PROGRESS on isolated branch `test/skip-policy-renderers` from
+  `e0b22a5`; exercise `on_unavailable: skip` through CLI and renderers as one separate test/docs
+  slice. Do not predeclare its outcome or batch it with another gap.
