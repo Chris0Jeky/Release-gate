@@ -4,7 +4,7 @@
 
 ```bash
 make install      # pip install -e ".[dev]"
-make test         # pytest (83 tests)
+make test         # pytest (84 tests)
 make demo-green   # both green examples; target fails unless both exit 0
 make demo-red     # red example; target fails unless the gate exits exactly 1
 make ci           # test + demo-green + demo-red (what CI runs)
@@ -22,7 +22,7 @@ math, provider failure, report honesty, exit codes — not line-coverage maximiz
 |---|---|
 | `test_verdicts.py` | every constraint type incl. boundaries and zero-baseline percentages; warn vs fail; `on_unavailable` fail/warn/skip; candidate-only constraints ignoring baseline availability; the implicit `errors.error_rate` rule (added, replaced, fails); unknown metric → config error; direction-mismatched constraints rejected; nearest-rank percentile math pinned |
 | `test_hashing.py` | canonical-JSON invariance (key order), sensitivity (values, list order), unicode, NaN rejection, digest format, file hashing |
-| `test_cost.py` | exact token×price math; missing tokens / missing model / no table → unavailable with reason; partial token data poisons totals instead of understating them; gating on unavailable cost fails closed; boolean pricing rates rejected (never used as 1/0) |
+| `test_cost.py` | exact token×price math; missing tokens / missing model / no table → unavailable with reason; partial token data poisons totals instead of understating them; gating on unavailable cost fails closed; `on_unavailable: "skip"` flows through the CLI and renders the skipped cost rule in Markdown and HTML; boolean pricing rates rejected (never used as 1/0) |
 | `test_provider_failure.py` | missing fixture and simulated `error` entries raise `ProviderError`; the run continues; failures land on items and in `errors.error_rate`; a candidate that only looks good on surviving items is blocked; baseline-side errors emit the exact notice in report JSON, Markdown, and HTML while a healthy candidate passes; all-items-failed yields unavailable score and latency metrics with no fabricated values; malformed fixture entries (negative/string tokens, non-dict) are clean config errors; error messages carry the config-relative fixtures ref, not an absolute path |
 | `test_reproducibility.py` | identical inputs → byte-identical report/md/html and equal `result_hash`; report is timestamp- and path-free (incl. the fake provider's fixtures path); the same inputs run from a different directory hash identically; manifest pins hashes + verdict; changed input changes the hash |
 | `test_scorers.py` | adapter parsing (citations, abstention regex, JSON fence stripping); all four abstention quadrants; hedged-fabrication answers (hedge + citation) counted as answers with citations validated; citation validity incl. fabricated citations on should-abstain items; keyword/field-match pass/fail/applicability; JSON-schema subset violations; unenforceable schemas rejected at construction; JSON-strict bool≠int semantics at every depth (incl. nested lists/dicts) |
@@ -39,20 +39,12 @@ tests break exactly one thing per case.
 see NEXT.md); the Action's PR-comment step (needs a live PR; the rest of action.yml is
 self-tested in CI on both examples and the step logic was exercised locally, below).
 
-**Known coverage gaps, pickup-ready** (from the 2026-07-12 adversarial review; all
-low-risk, current behavior verified correct by trace):
-
-- `on_unavailable: "skip"` end-to-end through CLI + renderers (unit-tested only; a
-  renderer regression on the `skipped` verdict icon would surface as exit 2, not a
-  wrong verdict).
-- Partial latency coverage — some-but-not-all items report it — is now tested
-  end-to-end: the coverage note surfaces in both renderers.
 ## Verified runs (2026-08-02, Windows 10, Python 3.14.3; CI mirrors on ubuntu 3.11/3.13)
 
 `python -m pytest` →
 
 ```
-83 passed in 0.53s
+84 passed in 0.55s
 ```
 
 `make demo-green` → both gates PASS, exit 0. RAG example (prompt improvement):
