@@ -4,7 +4,7 @@
 
 ```bash
 make install      # pip install -e ".[dev]"
-make test         # pytest (82 tests)
+make test         # pytest (83 tests)
 make demo-green   # both green examples; target fails unless both exit 0
 make demo-red     # red example; target fails unless the gate exits exactly 1
 make ci           # test + demo-green + demo-red (what CI runs)
@@ -23,7 +23,7 @@ math, provider failure, report honesty, exit codes — not line-coverage maximiz
 | `test_verdicts.py` | every constraint type incl. boundaries and zero-baseline percentages; warn vs fail; `on_unavailable` fail/warn/skip; candidate-only constraints ignoring baseline availability; the implicit `errors.error_rate` rule (added, replaced, fails); unknown metric → config error; direction-mismatched constraints rejected; nearest-rank percentile math pinned |
 | `test_hashing.py` | canonical-JSON invariance (key order), sensitivity (values, list order), unicode, NaN rejection, digest format, file hashing |
 | `test_cost.py` | exact token×price math; missing tokens / missing model / no table → unavailable with reason; partial token data poisons totals instead of understating them; gating on unavailable cost fails closed; boolean pricing rates rejected (never used as 1/0) |
-| `test_provider_failure.py` | missing fixture and simulated `error` entries raise `ProviderError`; the run continues; failures land on items and in `errors.error_rate`; a candidate that only looks good on surviving items is blocked; all-items-failed yields unavailable score metrics, not zeros; malformed fixture entries (negative/string tokens, non-dict) are clean config errors; error messages carry the config-relative fixtures ref, not an absolute path |
+| `test_provider_failure.py` | missing fixture and simulated `error` entries raise `ProviderError`; the run continues; failures land on items and in `errors.error_rate`; a candidate that only looks good on surviving items is blocked; baseline-side errors emit the exact notice in report JSON, Markdown, and HTML while a healthy candidate passes; all-items-failed yields unavailable score metrics, not zeros; malformed fixture entries (negative/string tokens, non-dict) are clean config errors; error messages carry the config-relative fixtures ref, not an absolute path |
 | `test_reproducibility.py` | identical inputs → byte-identical report/md/html and equal `result_hash`; report is timestamp- and path-free (incl. the fake provider's fixtures path); the same inputs run from a different directory hash identically; manifest pins hashes + verdict; changed input changes the hash |
 | `test_scorers.py` | adapter parsing (citations, abstention regex, JSON fence stripping); all four abstention quadrants; hedged-fabrication answers (hedge + citation) counted as answers with citations validated; citation validity incl. fabricated citations on should-abstain items; keyword/field-match pass/fail/applicability; JSON-schema subset violations; unenforceable schemas rejected at construction; JSON-strict bool≠int semantics at every depth (incl. nested lists/dicts) |
 | `test_reports.py` | rates rendered with sample counts; heuristic footnote present; unavailable cost labeled with its reason (and no fabricated `$0`); partial-coverage latency note surfaced in the markdown PR comment, not only the HTML; HTML escapes model output; failing items carry actionable detail |
@@ -48,15 +48,12 @@ low-risk, current behavior verified correct by trace):
 - Fabrication-guard assertions on the all-items-errored latency branch (`runner.py`).
   (Partial latency coverage — some-but-not-all items report it — is now tested
   end-to-end: the coverage note surfaces in both renderers.)
-- Baseline-side provider errors end-to-end (the "baseline run had N/M provider errors"
-  notice; `mini_gate` already accepts `baseline_responses` for this).
-
 ## Verified runs (2026-08-02, Windows 10, Python 3.14.3; CI mirrors on ubuntu 3.11/3.13)
 
 `python -m pytest` →
 
 ```
-82 passed in 0.62s
+83 passed in 0.59s
 ```
 
 `make demo-green` → both gates PASS, exit 0. RAG example (prompt improvement):

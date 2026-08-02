@@ -18,7 +18,7 @@ replays committed fixtures, so tests, demos and CI need no API key. v0.1.0, no t
 | Goal | Command | Result here |
 |---|---|---|
 | dev install | `make install` (`pip install -e ".[dev]"`) | — |
-| full suite | `python -m pytest` | `82 passed in 0.62s` |
+| full suite | `python -m pytest` | `83 passed in 0.59s` |
 | green demos | `make demo-green` | both gates PASS, exit 0 |
 | red demo | `make demo-red` | gate FAIL, exit 1 (that is success) |
 | what CI runs | `make ci` | test + demo-green + demo-red |
@@ -42,7 +42,7 @@ Run the narrowest row that covers your diff; each is well under a second.
 | `reports/`, `metrics.py` | `pytest tests/test_reports.py` (5) |
 | `pricing.py` | `pytest tests/test_cost.py` (7) |
 | `cli.py`, exit codes, GH env vars | `pytest tests/test_cli.py` (13) |
-| `providers/`, `runner.py` | `pytest tests/test_provider_failure.py` (8) |
+| `providers/`, `runner.py` | `pytest tests/test_provider_failure.py` (9) |
 | anything in the report dict | `pytest tests/test_hashing.py tests/test_reproducibility.py` (12) |
 | `examples/`, fixtures, thresholds | `make demo-green && make demo-red` |
 | `action.yml` | not runnable locally — the CI `action-self-test` lane is the only proof |

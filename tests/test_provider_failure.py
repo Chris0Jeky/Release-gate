@@ -106,6 +106,23 @@ def test_candidate_provider_failure_blocks_gate_via_implicit_rule(mini_gate):
     assert any("candidate run had 1/3" in n for n in report["gate"]["notices"])
 
 
+def test_baseline_provider_error_notice_is_reported_everywhere(mini_gate):
+    degraded = {k: dict(v) for k, v in GOOD_RESPONSE.items()}
+    degraded["r2"] = {"error": "baseline upstream timeout"}
+    paths = mini_gate(baseline_responses=degraded)
+
+    assert main(gate_argv(paths)) == 0
+    report = json.loads(open(f"{paths['out']}/report.json", encoding="utf-8").read())
+    notice = (
+        "baseline run had 1/3 provider errors; baseline aggregates cover only the answered items"
+    )
+    assert report["gate"]["notices"] == [notice]
+    markdown = open(f"{paths['out']}/report.md", encoding="utf-8").read()
+    html = open(f"{paths['out']}/report.html", encoding="utf-8").read()
+    assert notice in markdown
+    assert notice in html
+
+
 def test_run_continues_when_every_item_fails(mini_gate):
     paths = mini_gate(
         candidate_responses={
