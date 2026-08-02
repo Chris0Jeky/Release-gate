@@ -14,6 +14,9 @@ Owner decision: publish the Action from the renamed public repository as
 - [x] Annotated `v0.1.0` and initial `v0` tags both verified at `0e0f480`; the public
   [v0.1.0 GitHub release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.0)
   is published.
+- [x] Annotated `v0.1.1` and the current `v0` compatibility tag both verified at `5514019`;
+  the public [v0.1.1 GitHub release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.1)
+  is published.
 
 The agent-owned initial release is complete. `v0` may move only with a later reviewed,
 verified 0.x release; it is never an unattended automation target.
@@ -31,10 +34,10 @@ Owner decision: list the Action after the initial `v0.1.0` GitHub release exists
 can prepare and verify the release but cannot accept GitHub's Marketplace agreement or make
 owner identity/2FA attestations.
 
-The [v0.1.0 release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.0) is
-published. The owner should now:
+The current [v0.1.1 release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.1)
+is published. The owner should now:
 
-1. Open the `v0.1.0` release in this repository and choose **Publish this Action to the
+1. Open the `v0.1.1` release in this repository and choose **Publish this Action to the
    GitHub Marketplace**.
 2. Accept the Marketplace Developer Agreement, complete any 2FA/identity prompt, and choose
    the appropriate category.
