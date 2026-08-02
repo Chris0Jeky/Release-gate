@@ -9,12 +9,16 @@ repository policy; live evidence always wins.
   after the repository gate is met.
 - **Identity:** the public repository was renamed to
   [`Chris0Jeky/llm-release-gate`](https://github.com/Chris0Jeky/llm-release-gate) on 2026-08-02.
-- **Release state:** package metadata is `0.1.0`; no Git tag, GitHub release, or Marketplace
-  listing exists yet.
+- **Release state:** annotated `v0.1.0` and initial `v0` both peel to `0e0f480`; the public
+  [v0.1.0 GitHub release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.0)
+  was published 2026-08-02. Marketplace is not yet listed.
 - **Decisions:** q-1 is complete; q-2 is deliberately deferred; q-3 is waiting for the
   owner's Marketplace agreement after the first release; q-4 waits for two real users.
 - **Known low item:** issue #7's stale proving-check count was corrected and closed by PR #9;
   it never blocked the release.
+- **Release proof:** local full tests and `make ci` passed at `0e0f480`; hosted CI/action
+  self-test and Dependency Graph both succeeded at that exact SHA. Remote tags and release were
+  verified after publication.
 - **Historical audit:** merged PR evidence remains in GitHub and Git history. This file keeps
   the next decision and exact resume path, not a duplicate transaction log.
 
@@ -48,11 +52,11 @@ repository policy; live evidence always wins.
 | Stage | State | Agent-owned next action | Owner-only stop condition |
 |---|---|---|---|
 | Repository identity | COMPLETE | Keep all canonical references on `Chris0Jeky/llm-release-gate`. | None. |
-| Release readiness | IN PROGRESS | Merge this docs slice after exact-head checks and review; the independent count correction landed in PR #9. | None. |
-| Initial Action release | QUEUED | From reviewed `main`, create annotated `v0.1.0` and initial `v0` at the same SHA; create and verify the GitHub release. | None. |
+| Release readiness | COMPLETE | PR #10 merged after exact-head local/hosted checks and independent review. | None. |
+| Initial Action release | COMPLETE | `v0.1.0` and `v0` both resolve to the reviewed `0e0f480`; release is public. | None. |
 | Marketplace | BLOCKED | Verify the public listing after the owner completes q-3. | Marketplace agreement, identity/2FA, and category selection. |
 | PyPI | DORMANT | Do nothing until a real `pip install` request; then re-open q-2 and use Trusted Publishing. | Publishing identity/account configuration. |
-| Real provider | DORMANT | Do nothing until two named users request live-model runs; then implement only the requested provider. | Provider, secret path, and `sensitive_data` review. |
+| Real provider | DORMANT | Do nothing until two real users request live-model runs; then implement only the requested provider. | Provider, secret path, and `sensitive_data` review. |
 | Product maintenance | TRIGGER-DRIVEN | Work a verified failure, confirmed defect, or observable `NEXT.md` trigger. | Any new privacy, retention, hosting, or spending decision. |
 
 `v0` is a compatibility alias, not an unattended automation target: move it only as part of a
@@ -84,7 +88,8 @@ from this repository or this session. This repo's local tier declaration is the 
 
 ## Resume
 
-**Exact resume point:** finish and merge the `docs/launch-autonomy` release-readiness slice. Then
-refresh `main`; if `v0.1.0` is still absent and its exact-head CI is green, cut the initial
-`v0.1.0` + `v0` tags and GitHub release. Marketplace then waits only for the owner action in q-3.
-Do not add PyPI, provider, scheduler, hook, or hosted platform work without its recorded trigger.
+**Exact resume point:** the initial release is complete. On the next cold start, first reconcile
+live PR/CI/review/tag/release state. If the owner has completed q-3, verify the Marketplace listing
+and record it. Otherwise work only a verified failure, confirmed defect, or an observable `NEXT.md`
+trigger; if none exists, stop with this checkpoint rather than inventing PyPI, provider, scheduler,
+hook, or hosted-platform work.

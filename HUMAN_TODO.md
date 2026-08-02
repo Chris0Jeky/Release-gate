@@ -11,10 +11,12 @@ Owner decision: publish the Action from the renamed public repository as
 `Chris0Jeky/llm-release-gate@v0`.
 
 - [x] Repository renamed and canonical reference selected: `Chris0Jeky/llm-release-gate@v0`.
+- [x] Annotated `v0.1.0` and initial `v0` tags both verified at `0e0f480`; the public
+  [v0.1.0 GitHub release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.0)
+  is published.
 
-The remaining agent-owned release work is to cut and verify the exact `v0.1.0` and initial
-`v0` tags from reviewed `main`; it is tracked in the orchestration ledger, not as a human
-question.
+The agent-owned initial release is complete. `v0` may move only with a later reviewed,
+verified 0.x release; it is never an unattended automation target.
 
 ## q-2 — PyPI — DEFERRED BY OWNER 2026-08-02
 
@@ -29,7 +31,8 @@ Owner decision: list the Action after the initial `v0.1.0` GitHub release exists
 can prepare and verify the release but cannot accept GitHub's Marketplace agreement or make
 owner identity/2FA attestations.
 
-When the release is published, the owner should:
+The [v0.1.0 release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.0) is
+published. The owner should now:
 
 1. Open the `v0.1.0` release in this repository and choose **Publish this Action to the
    GitHub Marketplace**.
