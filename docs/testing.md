@@ -44,7 +44,7 @@ self-tested in CI on both examples and the step logic was exercised locally, bel
 `python -m pytest` →
 
 ```
-84 passed in 0.55s
+84 passed in 0.53s
 ```
 
 `make demo-green` → both gates PASS, exit 0. RAG example (prompt improvement):
@@ -59,7 +59,7 @@ llm-release-gate: gate FAIL
   [FAIL] quality.pass_rate: drop 0.375 vs allowed 0.1
   [FAIL] abstention.false_answer_rate: candidate 1 vs allowed maximum 0
   [FAIL] citations.valid_rate: drop 0.3 vs allowed 0.05
-  result hash: sha256:0a80717c3a4d5ec1774891dd455e057af1b84e3189521c347eac16db489837e3
+  result hash: sha256:49e6a79ab9f79dee2e8e8e5415cd59c8ae26ec9a2d259a5e50912d15b49a49d4
 OK: regression correctly blocked (exit 1)
 ```
 
