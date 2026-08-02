@@ -1,8 +1,7 @@
 name: "llm-release-gate"
 description: >-
-  Block unsafe LLM app changes: run baseline vs candidate configs over a golden
-  dataset, compare quality/abstention/citations/schema/latency/tokens/cost,
-  comment the summary on the PR, and fail the check on a material regression.
+  Run baseline and candidate LLM configs on a golden dataset; fail checks on
+  material quality, cost, or latency regressions.
 author: "llm-release-gate contributors"
 branding:
   icon: "shield"
