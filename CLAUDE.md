@@ -18,7 +18,7 @@ replays committed fixtures, so tests, demos and CI need no API key. v0.1.0, no t
 | Goal | Command | Result here |
 |---|---|---|
 | dev install | `make install` (`pip install -e ".[dev]"`) | — |
-| full suite | `python -m pytest` | `83 passed in 0.59s` |
+| full suite | `python -m pytest` | `83 passed in 0.53s` |
 | green demos | `make demo-green` | both gates PASS, exit 0 |
 | red demo | `make demo-red` | gate FAIL, exit 1 (that is success) |
 | what CI runs | `make ci` | test + demo-green + demo-red |

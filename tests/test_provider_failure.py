@@ -136,3 +136,8 @@ def test_run_continues_when_every_item_fails(mini_gate):
     # score metrics have no applicable items -> unavailable, not fabricated zeros
     q = report["metrics"]["quality.pass_rate"]["candidate"]
     assert q["available"] is False
+    for metric in ("latency.p50_ms", "latency.p95_ms", "latency.mean_ms"):
+        latency = report["metrics"][metric]["candidate"]
+        assert latency["available"] is False
+        assert latency["value"] is None
+        assert latency["note"] == "provider reported no latency"
