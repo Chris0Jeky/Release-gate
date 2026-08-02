@@ -12,9 +12,11 @@ repository policy; live evidence always wins.
 - **Release state:** `v0.1.0` remains immutable at `0e0f480`; `v0.1.1` remains immutable at
   `5514019`; annotated `v0.1.2` and the current `v0` compatibility tag both peel to `5c36235`.
   The public [v0.1.2 GitHub release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.2)
-  was published 2026-08-02. Marketplace is not yet listed.
-- **Decisions:** q-1 is complete; q-2 is deliberately deferred; q-3 is waiting for the
-  owner's Marketplace agreement after the first release; q-4 waits for two real users.
+  was published 2026-08-02. The public
+  [GitHub Marketplace listing](https://github.com/marketplace/actions/llm-release-gate) is live
+  at `v0.1.2` with **Continuous integration** and **Code quality** categories.
+- **Decisions:** q-1 and q-3 are complete; q-2 is deliberately deferred; q-4 waits for two
+  real users.
 - **Known low item:** issue #7's stale proving-check count was corrected and closed by PR #9;
   it never blocked the release.
 - **Release proof:** the prior 227-character Action description was corrected to 122 characters;
@@ -56,7 +58,7 @@ repository policy; live evidence always wins.
 | Repository identity | COMPLETE | Keep all canonical references on `Chris0Jeky/llm-release-gate`. | None. |
 | Release readiness | COMPLETE | PR #10 merged after exact-head local/hosted checks and independent review. | None. |
 | Public Action releases | COMPLETE | `v0.1.0` and `v0.1.1` remain immutable; `v0.1.2` and `v0` both resolve to reviewed `5c36235`; the release is public. | None. |
-| Marketplace | BLOCKED | Verify the public listing after the owner completes q-3 from `v0.1.2`. | Marketplace agreement, identity/2FA, primary **Continuous integration** category, and optional **Code quality** category. |
+| Marketplace | COMPLETE | Public listing is live at `v0.1.2` with **Continuous integration** and **Code quality** categories. | None. |
 | PyPI | DORMANT | Do nothing until a real `pip install` request; then re-open q-2 and use Trusted Publishing. | Publishing identity/account configuration. |
 | Real provider | DORMANT | Do nothing until two real users request live-model runs; then implement only the requested provider. | Provider, secret path, and `sensitive_data` review. |
 | Product maintenance | TRIGGER-DRIVEN | Work a verified failure, confirmed defect, or observable `NEXT.md` trigger. | Any new privacy, retention, hosting, or spending decision. |
@@ -90,8 +92,8 @@ from this repository or this session. This repo's local tier declaration is the 
 
 ## Resume
 
-**Exact resume point:** `v0.1.2` is the current verified `v0` Action release. On a cold start,
-first reconcile live PR/CI/review/tag/release state. If the owner has completed q-3 from the
-`v0.1.2` release, verify the Marketplace listing and record it. Otherwise work only a verified
-failure, confirmed defect, or an observable `NEXT.md` trigger; if none exists, stop with this
-checkpoint rather than inventing PyPI, provider, scheduler, hook, or hosted-platform work.
+**Exact resume point:** `v0.1.2` is the current verified `v0` Action release and its Marketplace
+listing is live. On a cold start, first reconcile live PR/CI/review/tag/release/listing state.
+Then work only a verified failure, confirmed defect, or an observable `NEXT.md` trigger; if none
+exists, stop with this checkpoint rather than inventing PyPI, provider, scheduler, hook, or
+hosted-platform work.
