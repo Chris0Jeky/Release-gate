@@ -11,7 +11,7 @@ inputs (dataset, baseline config, candidate config, scorers, thresholds — plus
 pricing table) it runs baseline and candidate over the golden dataset, scores both, writes
 `report.{json,md,html}` + `manifest.json`, and exits **0 pass / 1 regression blocked /
 2 could-not-run**. Zero runtime dependencies; offline by default — the `fake` provider
-replays committed fixtures, so tests, demos and CI need no API key. Package version is v0.1.1;
+replays committed fixtures, so tests, demos and CI need no API key. Package version is v0.1.2;
 the current public-release stage lives in `ORCHESTRATOR.md`.
 
 ## Run it (measured 2026-08-02, Windows, Python 3.14.3)

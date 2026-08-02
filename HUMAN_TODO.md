@@ -34,13 +34,14 @@ Owner decision: list the Action after the initial `v0.1.0` GitHub release exists
 can prepare and verify the release but cannot accept GitHub's Marketplace agreement or make
 owner identity/2FA attestations.
 
-The current [v0.1.1 release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.1)
-is published. The owner should now:
+Do not publish the current `v0.1.1` release to Marketplace: GitHub rejected its 227-character
+Action description. The agent-owned `v0.1.2` metadata-only patch must be released first. Then
+the owner should:
 
-1. Open the `v0.1.1` release in this repository and choose **Publish this Action to the
+1. Open the `v0.1.2` release in this repository and choose **Publish this Action to the
    GitHub Marketplace**.
 2. Accept the Marketplace Developer Agreement, complete any 2FA/identity prompt, and choose
-   the appropriate category.
+   **Continuous integration** as the primary category. Optionally also choose **Code quality**.
 3. Confirm the public listing is live; an agent may then verify the listing and record it.
 
 - [ ] Owner-only Marketplace agreement/identity and category selection completed.

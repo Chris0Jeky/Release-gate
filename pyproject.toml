@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llm-release-gate"
-version = "0.1.1"
+version = "0.1.2"
 description = "CLI + GitHub Action that blocks unsafe LLM app changes: runs baseline vs candidate configs over a golden dataset and fails the check on a material regression."
 readme = "README.md"
 requires-python = ">=3.11"
