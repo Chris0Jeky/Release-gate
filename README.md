@@ -109,7 +109,7 @@ permissions:
   pull-requests: write   # needed for the PR comment; without it the comment
                          # becomes a warning and the verdict still stands
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@v5
   - uses: Chris0Jeky/llm-release-gate@v0 # or, inside this repo's checkout only: uses: ./
     with:
       dataset: eval/dataset.json
@@ -120,6 +120,9 @@ steps:
       pricing: eval/pricing.json         # optional
       comment: "true"                    # posts/updates the PR comment
 ```
+
+The public Action's setup uses the Node 24 runtime. GitHub-hosted runners already meet its
+runner requirement; self-hosted runners must use GitHub Actions Runner **2.327.1 or newer**.
 
 The Action installs the CLI, runs the gate, writes the job summary, posts the Markdown
 report as a PR comment (also when it fails — that's the point), and fails the check on
