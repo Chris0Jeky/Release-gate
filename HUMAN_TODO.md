@@ -31,23 +31,14 @@ for `pip install`. At that point re-check name availability and use PyPI Trusted
 (short-lived GitHub OIDC), not a long-lived API token. This is a dormant trigger, not an
 active action item.
 
-## q-3 — GitHub Marketplace — HUMAN ACTION AFTER INITIAL RELEASE
+## q-3 — GitHub Marketplace — COMPLETED 2026-08-02
 
-Owner decision: list the Action after the initial `v0.1.0` GitHub release exists. An agent
-can prepare and verify the release but cannot accept GitHub's Marketplace agreement or make
-owner identity/2FA attestations.
+The owner completed the Marketplace workflow. The public
+[llm-release-gate Marketplace listing](https://github.com/marketplace/actions/llm-release-gate)
+is live at `v0.1.2` with **Continuous integration** and **Code quality** categories.
 
-The current [v0.1.2 release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.2)
-is published. Its Action description is now 122 characters, below GitHub Marketplace's
-125-character limit. The owner should:
-
-1. Open the `v0.1.2` release in this repository and choose **Publish this Action to the
-   GitHub Marketplace**.
-2. Accept the Marketplace Developer Agreement, complete any 2FA/identity prompt, and choose
-   **Continuous integration** as the primary category. Optionally also choose **Code quality**.
-3. Confirm the public listing is live; an agent may then verify the listing and record it.
-
-- [ ] Owner-only Marketplace agreement/identity and category selection completed.
+- [x] Owner-only Marketplace agreement/identity and category selection completed; public
+  listing directly verified 2026-08-02.
 
 ## q-4 — Real provider adapter — WAIT FOR TWO REAL USER REQUESTS
 
