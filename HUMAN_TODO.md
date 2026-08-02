@@ -14,8 +14,11 @@ Owner decision: publish the Action from the renamed public repository as
 - [x] Annotated `v0.1.0` and initial `v0` tags both verified at `0e0f480`; the public
   [v0.1.0 GitHub release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.0)
   is published.
-- [x] Annotated `v0.1.1` and the current `v0` compatibility tag both verified at `5514019`;
-  the public [v0.1.1 GitHub release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.1)
+- [x] Annotated `v0.1.1` remains immutable at `5514019`; the public
+  [v0.1.1 GitHub release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.1)
+  is published.
+- [x] Annotated `v0.1.2` and the current `v0` compatibility tag both verified at `5c36235`;
+  the public [v0.1.2 GitHub release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.2)
   is published.
 
 The agent-owned initial release is complete. `v0` may move only with a later reviewed,
@@ -34,9 +37,9 @@ Owner decision: list the Action after the initial `v0.1.0` GitHub release exists
 can prepare and verify the release but cannot accept GitHub's Marketplace agreement or make
 owner identity/2FA attestations.
 
-Do not publish the current `v0.1.1` release to Marketplace: GitHub rejected its 227-character
-Action description. The agent-owned `v0.1.2` metadata-only patch must be released first. Then
-the owner should:
+The current [v0.1.2 release](https://github.com/Chris0Jeky/llm-release-gate/releases/tag/v0.1.2)
+is published. Its Action description is now 122 characters, below GitHub Marketplace's
+125-character limit. The owner should:
 
 1. Open the `v0.1.2` release in this repository and choose **Publish this Action to the
    GitHub Marketplace**.
